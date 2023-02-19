@@ -32,19 +32,22 @@ class WEdge {
         this.node1 = node1;
         // this.k = 0.5; // spring stiffness
         // this.targetLength = 0.5;
+        this.TargetLength = 0.05;
+        this.SpringConstant = 0.5;
+        this.Show = true;
     }
 
-    TargetLength = 0.05;
-    SpringConstant = 0.5;
-    Show = true;
+    // TargetLength = 0.05;
+    // SpringConstant = 0.5;
+    // Show = true;
 
     ApplySpringForce = () => {
-        const dp = this.node1.p.sub(this.node0.p);
-        const dist = dp.length;
-        dp.normalize();
+        this.dp = this.node1.p.sub(this.node0.p);
+        this.dist = this.dp.length;
+        this.dp.normalize();
 
-        this.node0.f += dp * (dist - this.TargetLength) * this.SpringConstant;
-        this.node1.f += dp * (dist - this.TargetLength) * this.SpringConstant;
+        this.node0.f += this.dp * (this.dist - this.TargetLength) * this.SpringConstant;
+        this.node1.f += this.dp * (this.dist - this.TargetLength) * this.SpringConstant;
     }
 }
 
@@ -85,10 +88,10 @@ class WGraph {
     GetEdgeLines = () => {
         for (let i = 0; i < this.edges.length; ++i) {
             if (this.edges[i].Show) {
-                let points = [this.edges[i].node0.p, this.edges[i].node1.p]
-                const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                const line = new THREE.Line(geometry, this.lineMaterial);
-                this.scene.add(line);
+                this.points = [this.edges[i].node0.p, this.edges[i].node1.p]
+                this.geometry = new THREE.BufferGeometry().setFromPoints(this.points);
+                this.line = new THREE.Line(this.geometry, this.lineMaterial);
+                this.scene.add(this.line);
             }
         }
     }

@@ -1,33 +1,10 @@
 import React, {useEffect, useRef} from 'react';
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
 import './css/Graph.css';
 
 import {WGraph, WEdge, WNode} from '../lib/GraphHelper';
-
-import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
-
-// const ControlPanel = (props) => {
-//     useEffect( () => {
-//         console.log(this.props);
-//         const sim = this.props.threshhold;
-//         const panel = new GUI({width: 300});
-//         // create folders for control categories
-//         const f0 = panel.addFolder("threshhold");
-    
-//         let settings = {
-//             "threshhold": sim,
-//             "modify step size": 0.05, 
-//             // add mass?
-//         };
-    
-//         const setThreshhold = (value) => {
-//             sim = value;
-//         }
-
-//         f0.add(settings, "threshhold").onChange(setThreshhold)
-//     })
-// }
 
 const Graph = () => {
     const mountRef = useRef(null);
@@ -80,6 +57,13 @@ const Graph = () => {
         return new THREE.Vector3(vec.x/len, vec.y/len, vec.z/len);
     }
 
+    // orbital controls
+    let renderRequested = false; // should render params
+    const controls = new OrbitControls(camera, canvas);
+    controls.target.set(0, 0, 0);
+    controls.enableDamping = true;
+    renderer.setSize(window.innerWidth, window.innerHeight);  
+
     // generate nodes and edges
     const NODES_LENGTH = 1571; // similarityMatrix is 1571 x 1571
     const SCALE = 40.0;
@@ -88,22 +72,30 @@ const Graph = () => {
     }
 
     // TEST GUI:
-    let sim = 0.999;
+    let sim = 0.995;
     const panel = new GUI({width: 300});
     // create folders for control categories
     const f0 = panel.addFolder("Similarity Threshhold");
 
     let settings = {
-        threshhold: .995,
+        threshhold: 0.995,
         // add mass?
     };
-
     const setThreshhold = (value) => {
         console.log(`threshhold: ${value}`);
         sim = value;
     }
-
-    f0.add(settings, "threshhold", 0.95, 1.00, 0.005).onChange(setThreshhold)
+    const requestRenderIfValueChanged = (value) => {
+        if (!renderRequested) {
+            renderRequested = true;
+            console.log(`value: ${value}`);
+            wgraph.GetEdgeLines();
+            requestAnimationFrame(animate);
+        }
+        sim = value;
+        console.log(`value: ${value}`);
+    }
+    f0.add(settings, "threshhold", 0.95, 1.00, 0.005).onChange(requestRenderIfValueChanged)
     f0.open();
 
 
@@ -117,7 +109,7 @@ const Graph = () => {
             // similarity / connection threshhold 0.55
             // SCALE = 4.0
             // if (sim < 0.55) {
-            const rndLength = Math.random();
+            const rndLength = Math.round(Math.random()*1000)/1000; // 3 decimal places
             // const rndLength = sim; // TODO: why doesn't this work?
             // console.log(rndLength);
             if (rndLength < 0.999) {
@@ -131,14 +123,7 @@ const Graph = () => {
                 edge.Show = true;
             }
         }
-    }
-
-    // orbital controls
-    let renderRequested = false; // should render params
-    const controls = new OrbitControls(camera, canvas);
-    controls.target.set(0, 0, 0);
-    controls.enableDamping = true;
-    renderer.setSize(window.innerWidth, window.innerHeight);   
+    } 
 
     let requestRenderIfNotRequested = () => {
         if (!renderRequested) {
@@ -168,8 +153,8 @@ const Graph = () => {
         }
         
         // loop
-        requestAnimationFrame(animate);
         renderer.render(scene, camera);
+        requestAnimationFrame(animate);
     };
 
     let onMouseMove = (e) => {
@@ -177,9 +162,6 @@ const Graph = () => {
     }
 
     const makeNodeInstance = (scene, geometry, color, points) => {
-        // Point
-        // const material = new THREE.PointsMaterial();
-        // const threeObj = new THREE.Points(geometry, material);
         // Sphere
         const material = new THREE.MeshPhongMaterial({color: color});
         const threeObj = new THREE.Mesh(geometry, material);
@@ -199,10 +181,11 @@ const Graph = () => {
     // Orbital Controls event listeners
     controls.addEventListener('change', requestRenderIfNotRequested);
     document.body.appendChild(canvas);
-    
-    animate(); // only need to render once
-    wgraph.GetEdgeLines(); // TODO: how to avoid bug that makes initial loading so slow.
+
+    wgraph.GetEdgeLines();
     wgraph.Step(0.95, 0.02);
+    animate();
+    
     let centroidVec = calculateVecAverage(points);
     camera.lookAt(centroidVec);
     // clean up to prevent memory leaks

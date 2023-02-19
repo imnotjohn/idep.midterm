@@ -132,4 +132,4 @@ def getFetch():
 
 # If the script that was run is this script (we have not been imported)
 if __name__ == "__main__": 
-    app.run(debug=True, ssl_context="ad-hoc", port=3001)
+    app.run(debug=True, ssl_context="adhoc", port=3001)
