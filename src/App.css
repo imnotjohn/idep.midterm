@@ -1,4 +1,4 @@
-.App {
+#App {
   align-items: center;
   background-color: #282c34;
   display: flex;
@@ -6,7 +6,7 @@
   justify-content: center;
   margin: 0;
   text-align: center;
-  width: 100vw;
+  max-width: 100vw;
   color: white;
 }
 

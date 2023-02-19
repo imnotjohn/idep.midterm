@@ -74,7 +74,7 @@ const Graph = () => {
             // SCALE = 4.0
             // if (sim < 0.55) {
             const rndLength = Math.random();
-            if (rndLength < 0.85) {
+            if (rndLength < 0.999) {
                 edge.SpringConstant = 0.05;
                 edge.TargetLength = (1.0 - rndLength) * SCALE * 2.0;
                 edge.Show = false;
@@ -155,7 +155,7 @@ const Graph = () => {
     document.body.appendChild(canvas);
     
     animate(); // only need to render once
-    // wgraph.GetEdgeLines(); // TODO: how to avoid bug that makes initial loading so slow.
+    wgraph.GetEdgeLines(); // TODO: how to avoid bug that makes initial loading so slow.
     wgraph.Step(0.95, 0.02);
     let centroidVec = calculateVecAverage(points);
     camera.lookAt(centroidVec);

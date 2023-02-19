@@ -7,9 +7,9 @@ import Graph from './components/Graph';
 
 function App() {
   return (
-    <>
+    <div id="App">
       <Graph />
-    </>
+    </div>
   );
 }
 
