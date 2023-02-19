@@ -5,6 +5,30 @@ import './css/Graph.css';
 
 import {WGraph, WEdge, WNode} from '../lib/GraphHelper';
 
+import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
+
+// const ControlPanel = (props) => {
+//     useEffect( () => {
+//         console.log(this.props);
+//         const sim = this.props.threshhold;
+//         const panel = new GUI({width: 300});
+//         // create folders for control categories
+//         const f0 = panel.addFolder("threshhold");
+    
+//         let settings = {
+//             "threshhold": sim,
+//             "modify step size": 0.05, 
+//             // add mass?
+//         };
+    
+//         const setThreshhold = (value) => {
+//             sim = value;
+//         }
+
+//         f0.add(settings, "threshhold").onChange(setThreshhold)
+//     })
+// }
+
 const Graph = () => {
     const mountRef = useRef(null);
     useEffect( () => {
@@ -63,6 +87,26 @@ const Graph = () => {
         wgraph.nodes.push(new WNode(new THREE.Vector3(Math.random() * SCALE, Math.random() * SCALE, Math.random() * SCALE)))
     }
 
+    // TEST GUI:
+    let sim = 0.999;
+    const panel = new GUI({width: 300});
+    // create folders for control categories
+    const f0 = panel.addFolder("Similarity Threshhold");
+
+    let settings = {
+        threshhold: .995,
+        // add mass?
+    };
+
+    const setThreshhold = (value) => {
+        console.log(`threshhold: ${value}`);
+        sim = value;
+    }
+
+    f0.add(settings, "threshhold", 0.95, 1.00, 0.005).onChange(setThreshhold)
+    f0.open();
+
+
     const points = [];
     for (let j = 0; j < NODES_LENGTH; ++j) {
         // const row = sims[j];
@@ -74,6 +118,8 @@ const Graph = () => {
             // SCALE = 4.0
             // if (sim < 0.55) {
             const rndLength = Math.random();
+            // const rndLength = sim; // TODO: why doesn't this work?
+            // console.log(rndLength);
             if (rndLength < 0.999) {
                 edge.SpringConstant = 0.05;
                 edge.TargetLength = (1.0 - rndLength) * SCALE * 2.0;
