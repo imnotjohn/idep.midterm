@@ -127,7 +127,7 @@ def getFetch():
     # df = pd.read_csv("data/words_vectored.csv")
     # vecs = df.vectored.values
     # sims = calculateSimularityMatrix(vecs)
-    mat = np.loadtxt("data/simularityMatrix.gz")
+    mat = np.loadtxt("data/simularityMatrix400.gz")
     return json.dumps(mat.tolist())
 
 # If the script that was run is this script (we have not been imported)

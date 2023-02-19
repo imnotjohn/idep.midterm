@@ -5,6 +5,7 @@ import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
 import './css/Graph.css';
 
 import {WGraph, WEdge, WNode} from '../lib/GraphHelper';
+import SIMSDATA from '../lib/SimMatData';
 
 const Graph = () => {
     const mountRef = useRef(null);
@@ -65,61 +66,54 @@ const Graph = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);  
 
     // generate nodes and edges
-    const NODES_LENGTH = 1571; // similarityMatrix is 1571 x 1571
+    const NODES_LENGTH = 400; // similarityMatrix is 1571 x 1571
     const SCALE = 40.0;
     for (let i = 0; i < NODES_LENGTH; ++i) {
         wgraph.nodes.push(new WNode(new THREE.Vector3(Math.random() * SCALE, Math.random() * SCALE, Math.random() * SCALE)))
     }
 
     // TEST GUI:
-    let sim = 0.995;
+    // let sim = 0.995;
     const panel = new GUI({width: 300});
     // create folders for control categories
     const f0 = panel.addFolder("Similarity Threshhold");
 
     let settings = {
-        threshhold: 0.995,
+        threshhold: 0.65,
         // add mass?
     };
     const setThreshhold = (value) => {
-        console.log(`threshhold: ${value}`);
-        sim = value;
+        settings["threshhold"] = value;
     }
     const requestRenderIfValueChanged = (value) => {
         if (!renderRequested) {
             renderRequested = true;
-            console.log(`value: ${value}`);
+            settings["threshhold"] = value;
             wgraph.GetEdgeLines();
             requestAnimationFrame(animate);
         }
-        sim = value;
         console.log(`value: ${value}`);
     }
-    f0.add(settings, "threshhold", 0.95, 1.00, 0.005).onChange(requestRenderIfValueChanged)
+    f0.add(settings, "threshhold", 0.15, 0.80, 0.005).onChange(requestRenderIfValueChanged)
     f0.open();
 
 
     const points = [];
     for (let j = 0; j < NODES_LENGTH; ++j) {
-        // const row = sims[j];
+        const row = SIMSDATA[j];
         for (let i = j + 1; i < NODES_LENGTH; ++i) {
             const edge = new WEdge(wgraph.nodes[j], wgraph.nodes[i])
             wgraph.edges.push(edge);
-            // const sim = row[i];
-            // similarity / connection threshhold 0.55
-            // SCALE = 4.0
-            // if (sim < 0.55) {
-            const rndLength = Math.round(Math.random()*1000)/1000; // 3 decimal places
-            // const rndLength = sim; // TODO: why doesn't this work?
-            // console.log(rndLength);
-            if (rndLength < 0.999) {
+            const sim = row[i];
+            // const rndLength = Math.round(Math.random()*1000)/1000; // 3 decimal places
+            if (sim < settings["threshhold"]) {
                 edge.SpringConstant = 0.05;
-                edge.TargetLength = (1.0 - rndLength) * SCALE * 2.0;
+                edge.TargetLength = (1.0 - sim) * SCALE * 2.0;
                 edge.Show = false;
             } else {
                 points.push(wgraph.nodes[j].p) // test
                 edge.SpringConstant = 0.5;
-                edge.TargetLength = (1.0 - rndLength) * SCALE;
+                edge.TargetLength = (1.0 - sim) * SCALE;
                 edge.Show = true;
             }
         }
