@@ -4,11 +4,12 @@ via
 https://dev.to/yuribenjamin/how-to-deploy-react-app-in-github-pages-2a1f
 */
 import Graph from './components/Graph';
+import PrimitiveGraph from './components/PrimitiveGraph';
 
 function App() {
   return (
     <div id="App">
-      <Graph />
+      <PrimitiveGraph />
     </div>
   );
 }

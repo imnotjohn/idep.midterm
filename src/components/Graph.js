@@ -66,10 +66,13 @@ const Graph = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);  
 
     // generate nodes and edges
-    const NODES_LENGTH = 400; // similarityMatrix is 1571 x 1571
+    const NODES_LENGTH = SIMSDATA.length; // similarityMatrix is 1571 x 1571
     const SCALE = 40.0;
     for (let i = 0; i < NODES_LENGTH; ++i) {
         wgraph.nodes.push(new WNode(new THREE.Vector3(Math.random() * SCALE, Math.random() * SCALE, Math.random() * SCALE)))
+        const _p = new THREE.Vector3(Math.random() * SCALE, Math.random() * SCALE, Math.random() * SCALE)
+        const _u = 1.0;
+        wgraph.AddNode(_p, _u);
     }
 
     // TEST GUI:

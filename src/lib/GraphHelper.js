@@ -51,11 +51,34 @@ class WEdge {
     }
 }
 
+class WScene {
+    constructor() {
+        this.scene = new THREE.Scene();
+        this.innerHeight = window.innerHeight;
+        this.innerWidth = window.innerWidth;
+        this.aspect = this.innerWidth/this.innerHeight;
+        this.near = 0.1;
+        this.fov = 75;
+        this.far = 100;
+        this.light = new THREE.DirectionalLight(new THREE.Color(0xFFFFEE), 0.55);
+        this.camera = new THREE.PerspectiveCamera(this.fov, this.aspect, this.near, this.far);
+        this.sphereGeometry = new THREE.SphereGeometry(this.innerHeight/(10*this.innerHeight), 16, 16);
+        this.renderer = new THREE.WebGLRenderer({alpha: true});
+        this.canvas = this.renderer.domElement;
+
+        this.scene.add(this.light);
+        this.scene.background = new THREE.Color(0xCCCCCC);
+        this.light.position.set(-1, 2, 4);
+        this.camera.position.z = 18;
+    }
+}
+
 class WGraph {
     constructor() {
         this.nodes = [];
         this.edges = [];
         this.scene = new THREE.Scene();
+        // this.scene = new WScene();
         this.lineMaterial = new THREE.LineBasicMaterial({color: 0x0000ff, transparent: true, opacity: 0.25});
     }
     // Scene = new THREE.Scene();
