@@ -5,7 +5,8 @@ import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
 import './css/Graph.css';
 
-import {WGraph, WEdge, WNode} from '../lib/GraphHelper';
+import {WGraph, WEdge} from '../lib/GraphHelper';
+import SIMSDATA from '../lib/SimMatData';
 
 const PrimitiveGraph = () => {
     const mountRef = useRef(null);
@@ -13,11 +14,13 @@ const PrimitiveGraph = () => {
     useEffect( () => {
         let mRef = mountRef;
         let camera, scene, renderer, controls;
-        const wgraph = new WGraph();
+        let wgraph = new WGraph();
+        const points = [];
 
         const api = {
         
             count: 400,
+            simThreshhold: 0.65,
             distribution: 'random',
             resample: resample,
             surfaceColor: 0xFFF784,
@@ -25,17 +28,14 @@ const PrimitiveGraph = () => {
         
         };
         
-        let lineMesh, nodeMesh;
-        let lineGeometry, nodeGeometry;
-        let lineMaterial, nodeMaterial;
+        let nodeMesh;
+        let nodeGeometry;
+        let nodeMaterial;
         
-        let sampler;
+        // let sampler;
         const count = api.count;
         const radius = window.innerHeight/(10 * window.innerHeight);
         const dummy = new THREE.Object3D();
-        
-        const _position = new THREE.Vector3();
-        const _normal = new THREE.Vector3();
         
         const nodeRadius = window.innerHeight/(10 * window.innerHeight);
         const nodeSurfaceGeometry = new THREE.SphereGeometry( nodeRadius, 16, 16 ).toNonIndexed();
@@ -69,6 +69,30 @@ const PrimitiveGraph = () => {
             animate();
         };
 
+        const generateEdges = (wg) => {
+            for (let j = 0; j < count; j++) {
+                const row = SIMSDATA[j];
+                for (let i = j + 1; i < count; i++) {
+                    const edge = new WEdge(wg.nodes[j], wg.nodes[i]);
+                    wg.edges.push(edge);
+                    const sim = row[i];
+                    if (sim < api["simThreshhold"]) {
+                        edge.SpringConstant = 0.05;
+                        edge.TargetLength = (1.0 - sim) * 40.0 * 2.0;
+                        edge.Show = false;
+                    } else {
+                        console.log(wg);
+                        points.push(wg.nodes[j].p)
+                        edge.SpringConstant = 0.5;
+                        edge.TargetLength = (1.0 - sim) * 40.0;
+                        edge.Show = true;
+                    }
+                }
+            }
+            
+            wg.GetEdgeLines();
+        }
+
         const makeNodeInstance = (p) => {
             // Sphere
             const _nodeMesh = nodeMesh.clone();
@@ -79,16 +103,17 @@ const PrimitiveGraph = () => {
         }
 
         const generateNodePositions = (count) => {
-            const _wgraph = new WGraph();
             for (let i = 0; i < count; i++) {
                 const _p = new THREE.Vector3(Math.random() * 40.0, Math.random() * 40.0, Math.random() * 40.0)
                 const _u = 1.0;
-                _wgraph.AddNode(_p, _u);
+                wgraph.AddNode(_p, _u);
             }
 
-            for (let i = 0; i < _wgraph.nodes.length; i++) {
-                makeNodeInstance(_wgraph.nodes[i].p);
+            for (let i = 0; i < wgraph.nodes.length; i++) {
+                makeNodeInstance(wgraph.nodes[i].p);
             }
+
+            generateEdges(wgraph);
         }
         
         const initScene = () => {
@@ -107,37 +132,20 @@ const PrimitiveGraph = () => {
         
             //
         
-            scene = new THREE.Scene();
+            // scene = new THREE.Scene();
+            scene = wgraph.scene;
             initScene(scene);
         
             //
         
-            // scene.add( lineMesh );
-            // scene.add( nodeMesh );
-            // scene.add( nodeSurface );
-        
-            //
-        
-            const gui = new GUI();
+            const gui = new GUI({width: 150});
             gui.add( api, 'count', 0, count ).onChange( function () {
                 // lineMesh.count = api.count;
                 nodeMesh.count = api.count;
         
             } );
         
-            // gui.addColor( api, 'backgroundColor' ).onChange( function () {
-        
-            // 	scene.background.setHex( api.backgroundColor );
-        
-            // } );
-        
-            // gui.addColor( api, 'surfaceColor' ).onChange( function () {
-        
-            // 	nodeSurfaceMaterial.color.setHex( api.surfaceColor );
-        
-            // } );
-        
-            gui.add( api, 'distribution' ).options( [ 'random', 'weighted' ] ).onChange( resample );
+            // gui.add( api, 'distribution' ).options( [ 'random', 'weighted' ] ).onChange( resample );
             gui.add( api, 'resample' );
         
             //
@@ -159,68 +167,12 @@ const PrimitiveGraph = () => {
         }
         
         function resample() {
-        
-            // const vertexCount = nodeSurface.geometry.getAttribute( 'position' ).count;
-        
-            // console.info( 'Sampling ' + count + ' points from a nodeSurface with ' + vertexCount + ' vertices...' );
-        
-            //
-
-            // const _count = api.count;
-            // generateNodePositions(_count);
-        
-            console.log( 'rebuild scene' );
-            scene = new THREE.Scene();
+            
+            wgraph = new WGraph();
+            scene = wgraph.scene;
             initScene(scene);
-
-            const _count = api.count;
-            console.log(_count);
-            generateNodePositions(_count);
-        
-            // sampler = new MeshSurfaceSampler( nodeSurface )
-            //     .setWeightAttribute( api.distribution === 'weighted' ? 'uv' : null )
-            //     .build();
-        
-            // console.timeEnd( '.build()' );
-        
-            //
-        
-            // console.time( '.sample()' );
-        
-            // for ( let i = 0; i < count; i ++ ) {
-        
-            //     resampleParticle( i );
-        
-            // }
-        
-            // console.timeEnd( '.sample()' );
-        
-            // lineMesh.instanceMatrix.needsUpdate = true;
-            // nodeMesh.instanceMatrix.needsUpdate = true;
-        
-        }
-        
-        // function resampleParticle( i ) {
-        
-        //     sampler.sample( _position, _normal );
-        //     _normal.add( _position );
-        
-        //     dummy.position.copy( _position );
-        //     dummy.lookAt( _normal );
-        //     dummy.updateMatrix();
-        
-        //     // lineMesh.setMatrixAt( i, dummy.matrix );
-        //     nodeMesh.setMatrixAt( i, dummy.matrix );
-        
-        // }
-        
-        function updateParticle( i ) {
-        
-            // Update transform.
-        
-            // lineMesh.getMatrixAt( i, dummy.matrix );
-            // lineMesh.setMatrixAt( i, dummy.matrix );
-            nodeMesh.setMatrixAt( i, dummy.matrix );
+            generateNodePositions(api.count);
+            // generateNodePositions(api.count);
         
         }
         
