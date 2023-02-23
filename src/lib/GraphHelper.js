@@ -9,13 +9,12 @@ class WordVec {
 }
 
 class WNode {
-    constructor(p, wordvec) {
-    // constructor(p) {
+    // constructor(p, wordvec) {
+    constructor(p) {
         this.p = p;
         this.u = new THREE.Vector3();
         this.f = new THREE.Vector3();
-        // this.wordvec = wordvec;
-        this.w = wordvec.word;
+        // this.w = wordvec.word;
     }
 
     Move = (damping, dt) => {
@@ -83,13 +82,13 @@ class WGraph {
         this.lineMaterial = new THREE.LineBasicMaterial({color: 0x0000ff, transparent: true, opacity: 0.25});
     }
 
-    AddNode = (p, u, w) => {
-        this.p = p;
-        this.u = u;
-        this.w = w;
-        this.n = new WNode(this.p, this.u, this.w);
-        this.nodes.push(this.n);
-    }
+    // AddNode = (p, u, w) => {
+    //     this.p = p;
+    //     this.u = u;
+    //     this.w = w;
+    //     this.n = new WNode(this.p, this.u, this.w);
+    //     this.nodes.push(this.n);
+    // }
 
     AddNode = (p, u) => {
         this.p = p;

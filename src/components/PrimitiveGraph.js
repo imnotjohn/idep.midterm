@@ -5,7 +5,7 @@ import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
 import './css/Graph.css';
 
-import {WGraph, WEdge} from '../lib/GraphHelper';
+import {WGraph, WEdge} from '../lib/PrimitiveGraphHelper';
 import SIMSDATA from '../lib/SimMatData';
 import WORDS from '../lib/SimWords';
 
@@ -19,9 +19,9 @@ const PrimitiveGraph = () => {
         let points = [];
 
         const api = {
-        
+            
             count: 400,
-            simThreshhold: 0.75,
+            simThreshold: 0.75,
             distribution: 'random',
             resample: resample,
             surfaceColor: 0xFFF784,
@@ -33,14 +33,9 @@ const PrimitiveGraph = () => {
         let nodeGeometry;
         let nodeMaterial;
         
-        // let sampler;
         const count = api.count;
+        const threshold = api.simThreshold;
         const radius = window.innerHeight/(10 * window.innerHeight);
-        // const dummy = new THREE.Object3D();
-        // const nodeRadius = window.innerHeight/(10 * window.innerHeight);
-        // const nodeSurfaceGeometry = new THREE.SphereGeometry( nodeRadius, 16, 16 ).toNonIndexed();
-        // const nodeSurfaceMaterial = new THREE.MeshLambertMaterial( { color: api.surfaceColor, wireframe: false } );
-        // const nodeSurface = new THREE.Mesh( nodeSurfaceGeometry, nodeSurfaceMaterial );
 
         // initialize Meshes
         const initializeMeshes = () => {
@@ -75,7 +70,7 @@ const PrimitiveGraph = () => {
                     const edge = new WEdge(wgraph.nodes[j], wgraph.nodes[i]);
                     wgraph.edges.push(edge);
                     const sim = row[i];
-                    if (sim < api["simThreshhold"]) {
+                    if (sim < threshold) {
                         edge.SpringConstant = 0.05;
                         edge.TargetLength = (1.0 - sim) * 40.0 * 2.0;
                         edge.Show = false;
@@ -177,10 +172,8 @@ const PrimitiveGraph = () => {
             //
         
             const gui = new GUI({width: 150});
-            gui.add( api, 'count', 0, count, 5 ).onChange( function () {
-                // lineMesh.count = api.count;
-                nodeMesh.count = api.count;
-        
+            gui.add( api, 'simThreshold', 0, 1.0, 0.05).onChange( function (value) {
+                api.simThreshold = value;
             } );
         
             // gui.add( api, 'distribution' ).options( [ 'random', 'weighted' ] ).onChange( resample );
