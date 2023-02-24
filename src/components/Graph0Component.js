@@ -61,6 +61,7 @@ const Graph0Component = () => {
             const sphereMesh = new THREE.Mesh(geometry, material);
 
             for (let i = 0; i < g.nodes.length; i++) {
+                // TODO: implement with InstancedMesh instead to reduce number of draw calls.
                 const sm = sphereMesh.clone();
                 sm.position.x = g.nodes[i].p.x;
                 sm.position.y = g.nodes[i].p.y;
