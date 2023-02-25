@@ -16,10 +16,14 @@ const Graph0Component = () => {
 
         const init = () => {
             scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xfefefe);
 
             camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 1000 );
-            camera.position.set( 25, 25, 25 );
+            camera.position.set( 25, 25, 55 );
             camera.lookAt( 0, 0, 0 );
+
+            const light = new THREE.DirectionalLight(0xeeeeee, 0.35);
+            scene.add(light);
 
             renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true } );
             renderer.setPixelRatio( window.devicePixelRatio );
@@ -44,7 +48,6 @@ const Graph0Component = () => {
             }
             
             camera.lookAt(vec.x/len, vec.y/len, vec.z/len);
-            camera.rotation.z = 0;
         }
 
         const initNodes = () => {
@@ -56,10 +59,11 @@ const Graph0Component = () => {
             g.edges.push(new Edge0(g.nodes[1], g.nodes[2]))
             g.edges.push(new Edge0(g.nodes[2], g.nodes[0]))
 
-            const geometry = new THREE.SphereGeometry(window.innerHeight/(.5*window.innerHeight), 16, 16);
-            const material = new THREE.MeshPhongMaterial({color: 0x00FF00});
+            const geometry = new THREE.SphereGeometry(1.5, 16, 16);
+            const material = new THREE.MeshPhongMaterial({color: 0xEEEEEE});
             const sphereMesh = new THREE.Mesh(geometry, material);
 
+            // implement spheres
             for (let i = 0; i < g.nodes.length; i++) {
                 // TODO: implement with InstancedMesh instead to reduce number of draw calls.
                 const sm = sphereMesh.clone();
@@ -70,12 +74,21 @@ const Graph0Component = () => {
                 scene.add(sm);
             }
 
+            // implement edges
+            const lmat = new THREE.LineBasicMaterial({color: 0xFF0000, transparent: true, opacity: 0.45});
+
+            for (let i = 0; i < g.edges.length; i++) {
+                if (g.edges[i].show) {
+                    const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
+                    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+                    const line = new THREE.Line(geo, lmat);
+                    
+                    scene.add(line);
+                }
+            }
+
             // update position to centroid of nodes
             setTargetAverage();
-        }
-
-        const initEdges = () => {
-            // TODO: implement edges
         }
 
         const onWindowResize = () => {

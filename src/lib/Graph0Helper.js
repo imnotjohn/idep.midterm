@@ -21,7 +21,7 @@ class Edge0 {
         this.n1 = n1;
         this.targetLength = 0.05;
         this.k = 0.5; // spring constant
-        this.show = false;
+        this.show = true;
     }
 }
 
