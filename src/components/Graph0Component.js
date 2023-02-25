@@ -1,7 +1,6 @@
 import React, {useEffect, useRef} from 'react';
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
 import './css/Graph.css';
 
 import {Graph0, Node0, Edge0} from '../lib/Graph0Helper';
@@ -11,18 +10,17 @@ const Graph0Component = () => {
     useEffect( () => {
         let mRef = mountRef;
         let camera, scene, renderer, controls;
-        let averagedPoints;
         let g = new Graph0();
 
         const init = () => {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xfefefe);
+            scene.background = new THREE.Color(0xFEFEFE);
 
-            camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 1000 );
-            camera.position.set( 25, 25, 55 );
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set( 25, 25, 100);
             camera.lookAt( 0, 0, 0 );
 
-            const light = new THREE.DirectionalLight(0xeeeeee, 0.35);
+            const light = new THREE.HemisphereLight(0xFFFFFF, 0.55);
             scene.add(light);
 
             renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true } );
@@ -50,16 +48,23 @@ const Graph0Component = () => {
             camera.lookAt(vec.x/len, vec.y/len, vec.z/len);
         }
 
+        const nNodes = 20;
+        const rnd = Math.random();
+        const nScale = 40;
         const initNodes = () => {
-            g.nodes.push(new Node0(new THREE.Vector3(1 * 10,0,0), null))
-            g.nodes.push(new Node0(new THREE.Vector3(0,1 * 10,0), null))
-            g.nodes.push(new Node0(new THREE.Vector3(0.5 * 10,2 * 10,0), null))
+
+            // g.nodes.push(new Node0(new THREE.Vector3(1 * 10,0,0), null))
+            // g.nodes.push(new Node0(new THREE.Vector3(0,1 * 10,0), null))
+            // g.nodes.push(new Node0(new THREE.Vector3(0.5 * 10,2 * 10,0), null))
+            for (let i = 0; i < nNodes; i++) {
+                g.nodes.push(new Node0(new THREE.Vector3(Math.random() * nScale, Math.random() * nScale, Math.random() * nScale)))
+            }
         
             g.edges.push(new Edge0(g.nodes[0], g.nodes[1]))
             g.edges.push(new Edge0(g.nodes[1], g.nodes[2]))
             g.edges.push(new Edge0(g.nodes[2], g.nodes[0]))
 
-            const geometry = new THREE.SphereGeometry(1.5, 16, 16);
+            const geometry = new THREE.SphereGeometry(1.5, 32, 16);
             const material = new THREE.MeshPhongMaterial({color: 0xEEEEEE});
             const sphereMesh = new THREE.Mesh(geometry, material);
 
@@ -105,6 +110,7 @@ const Graph0Component = () => {
             requestAnimationFrame(animate);
 
             controls.update();
+            g.Move(0.95, 0.02);
             render();
         }
 
