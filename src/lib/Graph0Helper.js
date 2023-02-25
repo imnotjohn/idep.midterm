@@ -7,6 +7,7 @@ class Graph0 {
     }
 
     Move = (damping, dt) => {
+        console.log("move...");
 
         for (let i = 0; i < this.nodes.length; i++) {
             this.nodes[i].f = new THREE.Vector3();

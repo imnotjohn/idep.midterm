@@ -15,7 +15,7 @@ const Graph = () => {
     // camera params
     const fov = 75;
     const aspect = window.innerWidth/window.innerHeight;  // the canvas default
-    const near = 0.1;
+    const near = 10;
     const far = 100; // 5?
 
     // sphere params
