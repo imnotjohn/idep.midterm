@@ -37,8 +37,8 @@ const WordGraph = () => {
         // let testMesh;
 
         const params = {
-            nodeCount: 10,
-            threshold: 0.65,
+            nodeCount: 150,
+            threshold: 0.85,
         }
 
         const init = () => {
@@ -142,7 +142,13 @@ const WordGraph = () => {
 
         const initNodes = () => {
             for (let i = 0; i < params.nodeCount; i++) {
-                g.nodes.push(new WN(new THREE.Vector3(Math.random() * (Math.random() * 1.75) * nScale, Math.random() * (Math.random() * 1.75) * nScale, Math.random() * (Math.random() * 1.75) * nScale), WORDS[i]));
+                g.nodes.push(new WN(
+                    new THREE.Vector3(
+                        Math.random() * 100 - 50,
+                        Math.random() * 100 - 50,
+                        Math.random() * 100 - 50,
+                        ), 
+                    WORDS[i]));
             }
 
             for (let i = 0; i < params.nodeCount; i++) {
