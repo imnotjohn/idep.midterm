@@ -38,7 +38,7 @@ const WordGraph = () => {
 
         const params = {
             nodeCount: 10,
-            threshold: 0.55,
+            threshold: 0.65,
         }
 
         const init = () => {
@@ -97,6 +97,10 @@ const WordGraph = () => {
             const gui = new GUI();
             gui.add(params, "nodeCount", 1, MAX_NODES, 10).onChange( function(value) {
                 params.nodeCount = value;
+            });
+            gui.add(params, "threshold", 0.01, 0.99, 0.01).onChange( function(value) {
+                params.threshold = value;
+                initEdges();
             });
         
             window.addEventListener( 'resize', onWindowResize );
@@ -178,10 +182,10 @@ const WordGraph = () => {
             }
 
             // scene.add(new THREE.Line(lineGeom, lineMaterial));
-            updateEdges();
+            drawEdges();
         }
 
-        const updateEdges = () => {
+        const drawEdges = () => {
             // update edges connections
             const lineGeom = new THREE.BufferGeometry().setFromPoints(_points);
 
@@ -208,7 +212,10 @@ const WordGraph = () => {
         const render = () => {
 
             if (instance) {
-                instance.rotation.y += 0.0005;
+                // instance.rotation.y += 0.0005;
+                // instance.updateMatrixWorld();
+                scene.rotation.y += 0.0005;
+                scene.updateMatrixWorld();
                 instance.updateMatrixWorld();
             }
 
