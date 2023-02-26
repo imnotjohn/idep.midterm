@@ -32,7 +32,6 @@ const WordGraph = () => {
         const _position = new THREE.Vector3();
         const _points = [];
         const nScale = 60;
-
         let labelRenderer;
         // let testMesh;
 
