@@ -37,7 +37,7 @@ const WordGraph = () => {
         // let testMesh;
 
         const params = {
-            nodeCount: 150,
+            nodeCount: MAX_NODES,
             threshold: 0.85,
         }
 
@@ -83,24 +83,16 @@ const WordGraph = () => {
             );
             instance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
             // instance.count = 0;
+            scene.add(instance);
 
             // Line Object
             lineMaterial = new THREE.LineBasicMaterial({color: 0xFF0000, transparent: true, opacity: 0.45});
 
-            // const testGeom = new THREE.SphereGeometry(3, 32, 16);
-            // const testMaterial = new THREE.MeshPhongMaterial({color: 0xFF0000});
-            // testMesh = new THREE.Mesh(testGeom, testMaterial);
-            
-            scene.add(instance);
-
             // set up GUI
             const gui = new GUI();
-            gui.add(params, "nodeCount", 1, MAX_NODES, 10).onChange( function(value) {
-                params.nodeCount = value;
-            });
-            gui.add(params, "threshold", 0.01, 0.99, 0.01).onChange( function(value) {
-                params.threshold = value;
-                initEdges();
+            gui.add(instance, "count", 1, MAX_NODES, 10);
+            gui.add(params, "threshold", 0.01, 0.99, 0.01).listen().onChange( function(value) {
+                // params.threshold = value;
             });
         
             window.addEventListener( 'resize', onWindowResize );
@@ -152,7 +144,6 @@ const WordGraph = () => {
             }
 
             for (let i = 0; i < params.nodeCount; i++) {
-
                 const n = g.nodes[i];
                 initLabel(n);
                 _dummy.position.set(n.p.x, n.p.y, n.p.z);
@@ -167,14 +158,14 @@ const WordGraph = () => {
             setTargetAverage();
         }
 
-        const initEdges = () => {
+        const initEdges = (t) => {
             for (let j = 0; j < params.nodeCount; j++) {
                 const row = SIMSDATA[j];
                 for (let i = j + 1; i < params.nodeCount; i++) {
                     const e = new WE(g.nodes[j], g.nodes[i])
                     g.edges.push(e);
                     const sim = row[i];
-                    if (sim < params.threshold) {
+                    if (sim < t) {
                         e.k = 0.05;
                         e.targetLength = (1.0 - sim) * nScale * 2.0;
                         e.show = false;
@@ -187,7 +178,6 @@ const WordGraph = () => {
                 }
             }
 
-            // scene.add(new THREE.Line(lineGeom, lineMaterial));
             drawEdges();
         }
 
@@ -216,7 +206,6 @@ const WordGraph = () => {
         }
 
         const render = () => {
-
             if (instance) {
                 // instance.rotation.y += 0.0005;
                 // instance.updateMatrixWorld();
@@ -243,15 +232,13 @@ const WordGraph = () => {
         const animate = () => {
             requestAnimationFrame(animate);
 
-            controls.update();
-            // move();
             render();
+            controls.update();
         }
 
         init();
         initNodes();
-        initEdges();
-        // move();
+        initEdges(params.threshold);
         animate();
 
         return () => mRef.current.removeChild(renderer.domElement);

@@ -7,6 +7,11 @@ class WG {
         this.edges = [];
     }
 
+    Purge = () => {
+        this.nodes = [];
+        this.edges = [];
+    }
+
     Move = (damping, dt) => {
         console.log("move...");
 
