@@ -67,7 +67,7 @@ const WordGraph = () => {
 
             // Instanced Object
             instance = new THREE.InstancedMesh(
-                new THREE.SphereGeometry(.75, 32, 16),
+                new THREE.SphereGeometry(.65, 32, 16),
                 new THREE.MeshPhongMaterial({color: 0xEEEEEE}),
                 params.nodeCount
             );
