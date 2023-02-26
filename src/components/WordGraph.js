@@ -46,7 +46,7 @@ const WordGraph = () => {
             scene.background = new THREE.Color(0xDEDEDE);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(100, 50, 250);
+            camera.position.set(225, 250, 100);
             camera.lookAt(0, 0, 0);
 
             const light = new THREE.HemisphereLight(0xFFFFFF, 0x999999);
