@@ -17,23 +17,26 @@ const WordGraph = () => {
 
     useEffect( () => {
         let mRef = mountRef;
-        let camera, scene, renderer, controls;
         let g = new WG();
-        let lineSegments;
 
-        // instancing test
-        let instance;
+        // reusable variables
+        let camera, scene, renderer, controls; // threejs environment variables
+        let lineSegments, sphereInstance; // sphere + line variables
+        let labelRenderer; // CSS2D label variable
         const _dummy = new THREE.Object3D();
+        const _matrix = new THREE.Matrix4();
+        const _position = new THREE.Vector3();
         const _points = [];
         const nScale = 60;
-        let labelRenderer;
 
         const params = {
-            nodeCount: 250,
+            nodeCount: MAX_NODES,
             threshold: 0.85,
         }
 
         const init = () => {
+
+            // threejs Environment
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xDEDEDE);
 
@@ -49,7 +52,7 @@ const WordGraph = () => {
             renderer.setSize( window.innerWidth, window.innerHeight );
             document.body.appendChild( renderer.domElement );
 
-            // 2D test
+            // CSS2D Label Renderer
             labelRenderer = new CSS2DRenderer(); // 2D
             labelRenderer.setSize(window.innerWidth, window.innerHeight);
             labelRenderer.domElement.style.position = "absolute";
@@ -63,17 +66,19 @@ const WordGraph = () => {
             controls.enableDamping = true;
 
             // Instanced Object
-            instance = new THREE.InstancedMesh(
+            sphereInstance = new THREE.InstancedMesh(
                 new THREE.SphereGeometry(.65, 32, 16),
                 new THREE.MeshPhongMaterial({color: 0xFFFFFF}),
                 params.nodeCount
             );
-            instance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
-            scene.add(instance);
+            sphereInstance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
+            sphereInstance.count = 1;
+
+            scene.add(sphereInstance);
 
             // set up GUI
             const gui = new GUI();
-            gui.add(instance, "count", 1, MAX_NODES, 10)
+            gui.add(sphereInstance, "count", 1, MAX_NODES, 10)
             gui.add(params, "threshold", 0.01, 0.99, 0.01).listen().onChange(() => {
                 // params.threshold = value;
             });
@@ -103,7 +108,7 @@ const WordGraph = () => {
             nodeDiv.style.marginTop = "-1em";
             const nodeLabel = new CSS2DObject(nodeDiv);
             nodeLabel.position.set(node.p.x, node.p.y, node.p.z);
-            instance.add(nodeLabel);
+            sphereInstance.add(nodeLabel);
         }
 
         const initNodes = () => {
@@ -117,19 +122,23 @@ const WordGraph = () => {
                     WORDS[i]));
             }
 
+            updateNodes();
+
+            // update position to centroid of nodes
+            setTargetAverage();
+        }
+
+        const updateNodes = () => {
             for (let i = 0; i < params.nodeCount; i++) {
                 const n = g.nodes[i];
                 initLabel(n);
                 _dummy.position.set(n.p.x, n.p.y, n.p.z);
                 _dummy.updateMatrix();
-                instance.setMatrixAt(i, _dummy.matrix);
+                sphereInstance.setMatrixAt(i, _dummy.matrix);
             }
 
-            instance.instanceMatrix.needsUpdate = true;
-            instance.geometry.attributes.position.needsUpdate = true;
-
-            // update position to centroid of nodes
-            setTargetAverage();
+            sphereInstance.instanceMatrix.needsUpdate = true;
+            sphereInstance.geometry.attributes.position.needsUpdate = true;
         }
 
         const initEdges = () => {
@@ -171,11 +180,11 @@ const WordGraph = () => {
                             depthWrite: false
                         }));
                     
-                    instance.add(lineSegments);
+                    sphereInstance.add(lineSegments);
                 }
             }
 
-            instance.instanceMatrix.needsUpdate = true;
+            sphereInstance.instanceMatrix.needsUpdate = true;
             lineSegments.geometry.setDrawRange(0, lineNum);
             lineSegments.geometry.attributes.position.needsUpdate = true;
         }
@@ -188,31 +197,32 @@ const WordGraph = () => {
         }
 
         const render = () => {
-            if (instance) {
-                scene.rotation.y += 0.0005;
+            if (sphereInstance) {
+                scene.rotation.y += 0.00005;
                 scene.updateMatrixWorld();
-                instance.updateMatrixWorld();
+                sphereInstance.updateMatrixWorld();
             }
 
             renderer.render(scene, camera);
             labelRenderer.render(scene, camera);
         }
-/*
-        const move = () => {
-            if (!instance) return;
 
-            instance.getMatrixAt(0, _matrix); // extract position from transformationMatrix
-            _position.x += 0.01; // move
-            _matrix.setPosition(_position); // write new position to transformationMatrix
+        // const move = () => {
+        //     if (!sphereInstance) return;
+
+        //     sphereInstance.getMatrixAt(1, _matrix); // extract position from transformationMatrix
+        //     _position.x += 10; // move
+        //     _position.y += 10; // move
+        //     _matrix.setPosition(_position); // write new position to transformationMatrix
             
-            instance.setMatrixAt(0, _matrix);
-        }
-*/
+        //     sphereInstance.setMatrixAt(0, _matrix);
+        // }
 
         const animate = () => {
             requestAnimationFrame(animate);
 
             render();
+            g.Move(.95, 0.02);
             controls.update();
         }
 
