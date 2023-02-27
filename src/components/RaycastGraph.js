@@ -6,23 +6,29 @@ import './css/Graph.css';
 
 import SIMSDATA from '../lib/SimMatData';
 import WORDS from '../lib/SimWords';
+import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast, MeshBVHVisualizer } from 'three-mesh-bvh';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
+import {G, N, E} from '../lib/RaycastGraphHelper';
 
-import {WG, WN, WE} from '../lib/WordGraphHelper';
+// Add the extension functions
+THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
-const WordGraph = () => {
+const RaycastGraph = () => {
     const mountRef = useRef(null);
     const MAX_NODES = 400;
 
     useEffect( () => {
         let mRef = mountRef;
         let camera, scene, renderer, controls;
-        let g = new WG();
-        let lineSegments;
+        let g = new G();
+        let line;
 
         // instancing test
-        let instance;
+        let sphereInstance;
+        let lineSegments;
         let lineMaterial;
         const _dummy = new THREE.Object3D();
         const _points = [];
@@ -30,7 +36,7 @@ const WordGraph = () => {
         let labelRenderer;
 
         const params = {
-            nodeCount: 250,
+            nodeCount: 400,
             threshold: 0.85,
         }
 
@@ -64,18 +70,20 @@ const WordGraph = () => {
             controls.enableDamping = true;
 
             // Instanced Object
-            instance = new THREE.InstancedMesh(
+            sphereInstance = new THREE.InstancedMesh(
                 new THREE.SphereGeometry(.65, 32, 16),
                 new THREE.MeshPhongMaterial({color: 0xFFFFFF}),
                 params.nodeCount
             );
-            instance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
-            // instance.count = 0;
-            scene.add(instance);
+            sphereInstance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
+            scene.add(sphereInstance);
+
+            // Line Object
+            lineMaterial = new THREE.LineBasicMaterial({color: 0xCC00FF, transparent: true, opacity: 0.65, depthWrite: false});           
 
             // set up GUI
             const gui = new GUI();
-            gui.add(instance, "count", 1, MAX_NODES, 10)
+            gui.add(sphereInstance, "count", 1, MAX_NODES, 10)
             gui.add(params, "threshold", 0.01, 0.99, 0.01).listen().onChange(() => {
                 // params.threshold = value;
             });
@@ -105,12 +113,12 @@ const WordGraph = () => {
             nodeDiv.style.marginTop = "-1em";
             const nodeLabel = new CSS2DObject(nodeDiv);
             nodeLabel.position.set(node.p.x, node.p.y, node.p.z);
-            instance.add(nodeLabel);
+            sphereInstance.add(nodeLabel);
         }
 
         const initNodes = () => {
             for (let i = 0; i < params.nodeCount; i++) {
-                g.nodes.push(new WN(
+                g.nodes.push(new N(
                     new THREE.Vector3(
                         Math.random() * 200 - 10,
                         Math.random() * 200 - 10,
@@ -124,24 +132,28 @@ const WordGraph = () => {
                 initLabel(n);
                 _dummy.position.set(n.p.x, n.p.y, n.p.z);
                 _dummy.updateMatrix();
-                instance.setMatrixAt(i, _dummy.matrix);
+                sphereInstance.setMatrixAt(i, _dummy.matrix);
             }
 
-            instance.instanceMatrix.needsUpdate = true;
-            instance.geometry.attributes.position.needsUpdate = true;
+            sphereInstance.instanceMatrix.needsUpdate = true;
+            sphereInstance.geometry.attributes.position.needsUpdate = true;
 
             // update position to centroid of nodes
             setTargetAverage();
         }
 
         const initEdges = () => {
+            const pts = [];
+
             for (let j = 0; j < params.nodeCount; j++) {
                 const row = SIMSDATA[j];
                 for (let i = j + 1; i < params.nodeCount; i++) {
-                    const e = new WE(g.nodes[j], g.nodes[i])
+                    const e = new E(g.nodes[j], g.nodes[i])
                     g.edges.push(e);
                     const sim = row[i];
                     if (sim < params.threshold) {
+                        pts.push(e.n0.p);
+                        pts.push(e.n1.p);
                         e.k = 0.05;
                         e.targetLength = (1.0 - sim) * nScale * 2.0;
                         e.show = false;
@@ -154,10 +166,12 @@ const WordGraph = () => {
                 }
             }
 
-            drawEdges();
+
+
+            drawEdges(pts);
         }
 
-        const drawEdges = () => {
+        const drawEdges = (pts) => {
             // update edges connections
             let lineNum = 0;
             for (let i = 0; i < g.edges.length; i++) {
@@ -165,19 +179,18 @@ const WordGraph = () => {
                     lineNum++;
                     const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
                     const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
-                    lineSegments = new THREE.LineSegments(lineGeo, 
-                        new THREE.LineBasicMaterial({
-                            color: 0xFF0033,
-                            transparent: true,
-                            opacity: 0.45,
-                            depthWrite: false
-                        }));
+                    lineSegments = new THREE.LineSegments( lineGeo, new THREE.LineBasicMaterial( {
+                        color: 0xFF0000,
+                        transparent: true,
+                        opacity: 0.35,
+                        depthWrite: false
+                    } ) ); 
                     
-                    instance.add(lineSegments);
+                    sphereInstance.add(lineSegments);
                 }
             }
 
-            instance.instanceMatrix.needsUpdate = true;
+            sphereInstance.instanceMatrix.needsUpdate = true;
             lineSegments.geometry.setDrawRange(0, lineNum);
             lineSegments.geometry.attributes.position.needsUpdate = true;
         }
@@ -190,24 +203,25 @@ const WordGraph = () => {
         }
 
         const render = () => {
-            if (instance) {
+            if (sphereInstance) {
                 scene.rotation.y += 0.0005;
                 scene.updateMatrixWorld();
-                instance.updateMatrixWorld();
+                sphereInstance.updateMatrixWorld();
             }
 
             renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
+            labelRenderer.render(scene, camera); // 2D
         }
+
 /*
         const move = () => {
-            if (!instance) return;
+            if (!sphereInstance) return;
 
-            instance.getMatrixAt(0, _matrix); // extract position from transformationMatrix
+            sphereInstance.getMatrixAt(0, _matrix); // extract position from transformationMatrix
             _position.x += 0.01; // move
             _matrix.setPosition(_position); // write new position to transformationMatrix
             
-            instance.setMatrixAt(0, _matrix);
+            sphereInstance.setMatrixAt(0, _matrix);
         }
 */
 
@@ -231,4 +245,4 @@ const WordGraph = () => {
     )
 }
 
-export default WordGraph;
+export default RaycastGraph;
