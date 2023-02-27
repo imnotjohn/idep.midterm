@@ -23,7 +23,6 @@ const WordGraph = () => {
 
         // instancing test
         let instance;
-        let lineMaterial;
         const _dummy = new THREE.Object3D();
         const _points = [];
         const nScale = 60;
@@ -70,7 +69,6 @@ const WordGraph = () => {
                 params.nodeCount
             );
             instance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
-            // instance.count = 0;
             scene.add(instance);
 
             // set up GUI

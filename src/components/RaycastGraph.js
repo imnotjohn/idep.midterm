@@ -6,7 +6,7 @@ import './css/Graph.css';
 
 import SIMSDATA from '../lib/SimMatData';
 import WORDS from '../lib/SimWords';
-import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast, MeshBVHVisualizer } from 'three-mesh-bvh';
+import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
 import {G, N, E} from '../lib/RaycastGraphHelper';
@@ -24,12 +24,10 @@ const RaycastGraph = () => {
         let mRef = mountRef;
         let camera, scene, renderer, controls;
         let g = new G();
-        let line;
 
         // instancing test
         let sphereInstance;
         let lineSegments;
-        let lineMaterial;
         const _dummy = new THREE.Object3D();
         const _points = [];
         const nScale = 60;
