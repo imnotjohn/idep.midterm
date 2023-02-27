@@ -166,32 +166,33 @@ const SimpleGraph = () => {
                     }
                 }
                 
-                let lsCount = 0;
-                for (let i = 0; i < scene.children.length; i++) {
-                    if (scene.children[i].isLineSegments) {
-                        lsCount++;
-                    }
-                }
-                console.log(lsCount);
-                console.log(`number of children: ${scene.children.length}`);
-                if (lsCount > 0) {
-                    console.log(scene);
-                }
+                // debugging
+                // let lsCount = 0;
+                // for (let i = 0; i < scene.children.length; i++) {
+                //     if (scene.children[i].isLineSegments) {
+                //         lsCount++;
+                //     }
+                // }
+                // console.log(lsCount);
+                // console.log(`number of children: ${scene.children.length}`);
+                // if (lsCount > 0) {
+                //     console.log(scene);
+                // }
 
                 for (let i = 0; i < g.edges.length; i++) {
                     if (g.edges[i].show) {
-                    lineNum++;
-                    const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
-                    const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
-                    lineSegments.geometry = lineGeo;
-                    lineSegments = new THREE.LineSegments(lineGeo, 
-                        new THREE.LineBasicMaterial({
-                            color: 0xFF0033,
-                            transparent: true,
-                            opacity: 0.45,
-                            depthWrite: false
-                        }));
-                    scene.add(lineSegments);
+                        lineNum++;
+                        const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
+                        const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+                        lineSegments.geometry = lineGeo;
+                        lineSegments = new THREE.LineSegments(lineGeo, 
+                            new THREE.LineBasicMaterial({
+                                color: 0xFF0033,
+                                transparent: true,
+                                opacity: 0.45,
+                                depthWrite: false
+                            }));
+                        scene.add(lineSegments);
                     }
                 }
             }

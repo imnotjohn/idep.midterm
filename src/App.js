@@ -3,13 +3,11 @@ npm run deploy
 via
 https://dev.to/yuribenjamin/how-to-deploy-react-app-in-github-pages-2a1f
 */
-// import Graph from './components/Graph';
-// import PrimitiveGraph from './components/PrimitiveGraph';
-// import InstancedGraph from './components/InstancedGraph';
-// import Graph0Component from './components/Graph0Component';
-// import NodeSlider from './components/NodeSlider';
-// import WordGraph from './components/WordGraph';
-import SimpleGraph from './components/SimpleGraph';
+// import InstancedGraph from './components/InstancedGraph'; // Playground for implementing Instances
+// import Graph0Component from './components/Graph0Component'; // Debugging + Refactor Graph
+// import NodeSlider from './components/NodeSlider'; // Debugging for Sliders + Node Count
+// import SimpleGraph from './components/SimpleGraph'; // Debugging for Sliders + Animations
+import WordGraph from './components/WordGraph'; // Working Prototype of WordVec + Edge Visualizations
 
 function App() {
   return (
@@ -17,8 +15,8 @@ function App() {
       {/* <Graph0Component /> */}
       {/* <InstancedGraph /> */}
       {/* <NodeSlider /> */}
-      {/* <WordGraph /> */}
-      <SimpleGraph />
+      {/* <SimpleGraph /> */}
+      <WordGraph />
     </div>
   );
 }

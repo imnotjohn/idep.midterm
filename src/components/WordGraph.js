@@ -31,7 +31,7 @@ const WordGraph = () => {
 
         const params = {
             nodeCount: MAX_NODES,
-            threshold: 0.85,
+            threshold: 0.65,
         }
 
         const init = () => {
@@ -69,9 +69,10 @@ const WordGraph = () => {
             sphereInstance = new THREE.InstancedMesh(
                 new THREE.SphereGeometry(.65, 32, 16),
                 new THREE.MeshPhongMaterial({color: 0xFFFFFF}),
-                params.nodeCount
+                MAX_NODES
             );
-            sphereInstance.count = 1;
+            params.nodeCount = 250;
+            sphereInstance.count = params.nodeCount;
             sphereInstance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
 
             scene.add(sphereInstance);
@@ -80,7 +81,7 @@ const WordGraph = () => {
             const gui = new GUI();
             gui.add(sphereInstance, "count", 1, MAX_NODES, 10)
             gui.add(params, "threshold", 0.01, 0.99, 0.01).listen().onChange(() => {
-                // params.threshold = value;
+                initEdges();
             });
         
             window.addEventListener( 'resize', onWindowResize );
@@ -112,6 +113,12 @@ const WordGraph = () => {
         }
 
         const initNodes = () => {
+            if (g.nodes.length > 0) {
+                g.Purge();
+
+                // TODO: dispose + remove instances?
+            }
+
             for (let i = 0; i < params.nodeCount; i++) {
                 g.nodes.push(new WN(
                     new THREE.Vector3(
@@ -129,19 +136,25 @@ const WordGraph = () => {
         }
 
         const updateNodes = () => {
-            for (let i = 0; i < params.nodeCount; i++) {
+            // for (let i = 0; i < params.nodeCount; i++) {
+            for (let i = 0; i < g.nodes.length; i++) {
                 const n = g.nodes[i];
                 initLabel(n);
                 _dummy.position.set(n.p.x, n.p.y, n.p.z);
                 _dummy.updateMatrix();
                 sphereInstance.setMatrixAt(i, _dummy.matrix);
-            }
 
-            sphereInstance.instanceMatrix.needsUpdate = true;
-            sphereInstance.geometry.attributes.position.needsUpdate = true;
+                sphereInstance.instanceMatrix.needsUpdate = true;
+                sphereInstance.geometry.attributes.position.needsUpdate = true;
+            }
         }
 
         const initEdges = () => {
+            // Clear Edges if Edges already exists
+            if (g.edges.length > 0) {
+                g.PurgeEdges();
+            }
+
             for (let j = 0; j < params.nodeCount; j++) {
                 const row = SIMSDATA[j];
                 for (let i = j + 1; i < params.nodeCount; i++) {
@@ -167,27 +180,71 @@ const WordGraph = () => {
         const drawEdges = () => {
             // update edges connections
             let lineNum = 0;
-            for (let i = 0; i < g.edges.length; i++) {
-                if (g.edges[i].show) {
-                    lineNum++;
-                    const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
-                    const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
-                    lineSegments = new THREE.LineSegments(lineGeo, 
-                        new THREE.LineBasicMaterial({
-                            color: 0xFF0033,
-                            transparent: true,
-                            opacity: 0.45,
-                            depthWrite: false
-                        }));
-                    
-                    sphereInstance.add(lineSegments);
+            if (!lineSegments) {
+                // lineSegments not yet initialized
+                for (let i = 0; i < g.edges.length; i++) {
+                    if (g.edges[i].show) {
+                        lineNum++;
+                        const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
+                        const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+                        lineSegments = new THREE.LineSegments(lineGeo, 
+                            new THREE.LineBasicMaterial({
+                                color: 0xFF0033,
+                                transparent: true,
+                                opacity: 0.45,
+                                depthWrite: false
+                            }));
+                        // sphereInstance.add(lineSegments);
+                        scene.add(lineSegments);
+                    }
                 }
+            } else {
+                // lineSegments already exists
+                for (let i = 0; i < scene.children.length; i++) {
+                    if (scene.children[i].isLineSegments) {
+                        const obj = scene.children[i];
+                        // TODO: Debug why obj doesn't have dipose() methods
+                        // obj.geometry.dipose(); // throws error
+                        // obj.material.dispose(); // throws error
+                        scene.remove(obj);
+                    }
+                }
+
+                // debugging
+                let lsCount = 0;
+                for (let i = 0; i < scene.children.length; i++) {
+                    if (scene.children[i].isLineSegments) {
+                        lsCount++;
+                    }
+                }
+                console.log(lsCount);
+                console.log(`number of children: ${scene.children.length}`);
+                if (lsCount > 0) {
+                    console.log(scene);
+                }
+
+                for (let i = 0; i < g.edges.length; i++) {
+                    if (g.edges[i].show) {
+                        lineNum++;
+                        const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
+                        const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+                        lineSegments = new THREE.LineSegments(lineGeo, 
+                            new THREE.LineBasicMaterial({
+                                color: 0xFF0033,
+                                transparent: true,
+                                opacity: 0.45,
+                                depthWrite: false
+                            }));
+                        scene.add(lineSegments);
+                    }
+                }
+
             }
 
             sphereInstance.instanceMatrix.needsUpdate = true;
             lineSegments.geometry.setDrawRange(0, lineNum);
             lineSegments.geometry.attributes.position.needsUpdate = true;
-        }
+            }
 
         const onWindowResize = () => {
             camera.aspect = window.innerWidth / window.innerHeight;
