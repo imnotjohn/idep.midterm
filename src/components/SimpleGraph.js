@@ -10,6 +10,7 @@ import WORDS from '../lib/SimWords';
 
 
 import {WG, WN, WE} from '../lib/SimpleGraphHelper';
+import { LineSegments } from 'three';
 
 const SimpleGraph = () => {
     const mountRef = useRef(null);
@@ -27,7 +28,7 @@ const SimpleGraph = () => {
 
         const params = {
             nodeCount: 10,
-            threshold: 0.55,
+            threshold: 0.65,
         }
 
         const init = () => {
@@ -57,7 +58,7 @@ const SimpleGraph = () => {
             const gui = new GUI();
             // gui.add(sphereInstance, "count", 1, MAX_NODES, 10)
             gui.add(params, "threshold", 0.01, 0.99, 0.01).listen().onChange(() => {
-                // params.threshold = value;
+                initEdges();
             });
         
             window.addEventListener( 'resize', onWindowResize );
@@ -108,6 +109,11 @@ const SimpleGraph = () => {
         }
 
         const initEdges = () => {
+            if (g.edges.length > 0) {
+                console.log("purged");
+                g.PurgeEdges();
+            }
+
             for (let j = 0; j < params.nodeCount; j++) {
                 const row = SIMSDATA[j];
                 for (let i = j + 1; i < params.nodeCount; i++) {
@@ -129,15 +135,55 @@ const SimpleGraph = () => {
 
             drawEdges();
         }
-
         const drawEdges = () => {
             // update edges connections
             let lineNum = 0;
-            for (let i = 0; i < g.edges.length; i++) {
-                if (g.edges[i].show) {
+
+            if (!lineSegments) {
+                for (let i = 0; i < g.edges.length; i++) {
+                    if (g.edges[i].show) {
+                        lineNum++;
+                        const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
+                        const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+                        lineSegments = new THREE.LineSegments(lineGeo, 
+                            new THREE.LineBasicMaterial({
+                                color: 0xFF0033,
+                                transparent: true,
+                                opacity: 0.45,
+                                depthWrite: false
+                            }));
+                        scene.add(lineSegments);
+                    }
+                } 
+            } else {
+                // lineSegments already exists
+                for (let i = 0; i < scene.children.length; i++) {
+                    if (scene.children[i].isLineSegments) {
+                        const obj = scene.children[i];
+                        obj.geometry.dispose();
+                        obj.material.dispose();
+                        scene.remove(obj);
+                    }
+                }
+                
+                let lsCount = 0;
+                for (let i = 0; i < scene.children.length; i++) {
+                    if (scene.children[i].isLineSegments) {
+                        lsCount++;
+                    }
+                }
+                console.log(lsCount);
+                console.log(`number of children: ${scene.children.length}`);
+                if (lsCount > 0) {
+                    console.log(scene);
+                }
+
+                for (let i = 0; i < g.edges.length; i++) {
+                    if (g.edges[i].show) {
                     lineNum++;
                     const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
                     const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+                    lineSegments.geometry = lineGeo;
                     lineSegments = new THREE.LineSegments(lineGeo, 
                         new THREE.LineBasicMaterial({
                             color: 0xFF0033,
@@ -145,8 +191,8 @@ const SimpleGraph = () => {
                             opacity: 0.45,
                             depthWrite: false
                         }));
-                    
                     scene.add(lineSegments);
+                    }
                 }
             }
 
@@ -169,8 +215,7 @@ const SimpleGraph = () => {
             requestAnimationFrame(animate);
 
             render();
-            g.Move(0.95, 0.02);
-            updateNodes();
+            // g.Move(0.95, 0.02);
             controls.update();
         }
 

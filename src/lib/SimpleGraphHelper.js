@@ -13,6 +13,10 @@ class WG {
         this.edges = [];
     }
 
+    PurgeEdges = () => {
+        this.edges = [];
+    }
+
     Move = (damping, dt) => {
         if (this.fixed) return;
 
