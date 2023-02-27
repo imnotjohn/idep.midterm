@@ -72,7 +72,7 @@ const WordGraph = () => {
                 params.nodeCount
             );
             sphereInstance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
-            sphereInstance.count = 1;
+            // sphereInstance.count = 1;
 
             scene.add(sphereInstance);
 
@@ -222,7 +222,6 @@ const WordGraph = () => {
             requestAnimationFrame(animate);
 
             render();
-            g.Move(.95, 0.02);
             controls.update();
         }
 

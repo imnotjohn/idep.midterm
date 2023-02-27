@@ -5,6 +5,7 @@ class WG {
     constructor() {
         this.nodes = [];
         this.edges = [];
+        this.fixed = false;
     }
 
     Purge = () => {
@@ -12,64 +13,37 @@ class WG {
         this.edges = [];
     }
 
-    // Skeleton:
-    // for (let i=0; i<this.nodes.length; ++i) {
-    //     this.nodes[i].f = new THREE.Vector3(0,0,0) //set force to zero
-    // }
-
-    // for (let i=0; i<this.edges.length; ++i) {
-    //     var e = this.edges[i]
-    //     var n0 = e.node0
-    //     var n1 = e.node1
-        
-    //     var currentLength = THREE.Vector3.distance(n0.p, n1.p)
-    //     var forceDir = THREE.Vector3.Subtract(n1.p, n0.p)
-    //     forceDir.normalize()
-
-    //     var strain = (e.targetLength = currentLength)*e.k;
-
-    //     forceDir.scale(strain);
-
-    //     n0.f.add(forceDir)
-    //     n1.f.subtract(forceDir)
-
-
-    //     this.nodes[i].f = new THREE.Vector3(0,0,0) //set force to zero
-    // }
-
-    // for (let i=0; i<this.nodes.length; ++i) {
-    //     this.nodes[i].u.scale(damping) //deccelaration
-    //     this.nodes[i].u.addMult(this.nodes[i].f, dt)
-    //     this.nodes[i].p.addMult(this.nodes[i].u, dt)
-        
-    // }
-
     Move = (damping, dt) => {
+        if (this.fixed) return;
 
-        // set forces to 0
         for (let i = 0; i < this.nodes.length; i++) {
             this.nodes[i].f = new THREE.Vector3();
         }
 
         for (let i = 0; i < this.edges.length; i++) {
-            const n0 = this.edges[i].n0;
-            const n1 = this.edges[i].n1;
-            const forceDir = n1.p.sub(n0.p); // forceDir
-            const currLength = forceDir.length(); // currentLength
-            // const strain = this.edges[i].targetLength - currLength;
-            const strain = (this.edges[i].targetLength - currLength) * this.edges[i].k;
-            forceDir.normalize();
-            forceDir.multiplyScalar(strain)
-
-            n0.f.add(forceDir);
-            n1.f.add(forceDir);
+            this.edges[i].ApplySpringForce();
         }
 
-        // TODO: double check algorithm from grasshopper.
         for (let i = 0; i < this.nodes.length; i++) {
-            this.nodes[i].u.add(this.nodes[i].f.multiplyScalar(dt));
-            this.nodes[i].u.multiplyScalar(damping);
-            this.nodes[i].p.add(this.nodes[i].u.multiplyScalar(dt));
+            this.nodes[i].Move(damping, dt);
+        }
+    }
+
+    GetEdgeLines = () => {
+        for (let i = 0; i < this.edges.length; i++) {
+            if (this.edges[i].show) {
+                const pts = [this.edges[i].n0.p, this.edges[i].n1.p];
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints(pts);
+                const lineSegment = new THREE.LineSegments( // add to scene?
+                    lineGeometry,
+                    new THREE.LineBasicMaterial({
+                        color: 0xFF0033,
+                        transparent: true,
+                        opacity: 0.45,
+                        depthWrite: false,
+                    })
+                )
+            }
         }
     }
 }
@@ -82,6 +56,12 @@ class WN {
         this.u = new THREE.Vector3();
         this.f = new THREE.Vector3();
     }
+
+    Move = (damping, dt) => {
+        this.u.multiplyScalar(damping);
+        this.u.add(this.f.multiplyScalar(dt));
+        this.p.add(this.u.multiplyScalar(dt));
+    }
 }
 
 // word edge
@@ -92,6 +72,22 @@ class WE {
         this.targetLength = 0.05;
         this.k = 0.5; // spring constant
         this.show = false;
+    }
+
+    ApplySpringForce = () => {
+        for (let i = 0; i < this.edges.length; i++) {
+            const n0 = this.edges[i].n0;
+            const n1 = this.edges[i].n1;
+            const forceDir = n1.p.sub(n0.p); // forceDir
+            const dist = forceDir.length(); // currentLength
+            // const strain = this.edges[i].targetLength - currLength;
+            const strain = (dist - this.edges[i].targetLength) * this.edges[i].k;
+            forceDir.normalize();
+            forceDir.multiplyScalar(strain)
+
+            n0.f.add(forceDir);
+            n1.f.sub(forceDir);
+        }
     }
 }
 
