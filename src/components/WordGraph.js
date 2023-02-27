@@ -71,8 +71,8 @@ const WordGraph = () => {
                 new THREE.MeshPhongMaterial({color: 0xFFFFFF}),
                 params.nodeCount
             );
+            sphereInstance.count = 1;
             sphereInstance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
-            // sphereInstance.count = 1;
 
             scene.add(sphereInstance);
 
