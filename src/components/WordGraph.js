@@ -31,7 +31,7 @@ const WordGraph = () => {
 
         const params = {
             nodeCount: MAX_NODES,
-            threshold: 0.65,
+            threshold: 0.85,
         }
 
         const init = () => {
@@ -80,7 +80,7 @@ const WordGraph = () => {
             // set up GUI
             const gui = new GUI();
             gui.add(sphereInstance, "count", 1, MAX_NODES, 10)
-            gui.add(params, "threshold", 0.01, 0.99, 0.01).listen().onChange(() => {
+            gui.add(params, "threshold", 0.50, 0.99, 0.01).listen().onChange(() => {
                 initEdges();
             });
         
