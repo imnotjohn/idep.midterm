@@ -8,7 +8,8 @@ https://dev.to/yuribenjamin/how-to-deploy-react-app-in-github-pages-2a1f
 // import InstancedGraph from './components/InstancedGraph';
 // import Graph0Component from './components/Graph0Component';
 // import NodeSlider from './components/NodeSlider';
-import WordGraph from './components/WordGraph';
+// import WordGraph from './components/WordGraph';
+import SimpleGraph from './components/SimpleGraph';
 
 function App() {
   return (
@@ -16,7 +17,8 @@ function App() {
       {/* <Graph0Component /> */}
       {/* <InstancedGraph /> */}
       {/* <NodeSlider /> */}
-      <WordGraph />
+      {/* <WordGraph /> */}
+      <SimpleGraph />
     </div>
   );
 }
