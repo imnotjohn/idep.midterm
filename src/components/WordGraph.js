@@ -30,8 +30,8 @@ const WordGraph = () => {
         const nScale = 60;
 
         const params = {
-            nodeCount: MAX_NODES,
-            threshold: 0.85,
+            nodeCount: 20,
+            threshold: 0.65,
         }
 
         const init = () => {
@@ -71,7 +71,7 @@ const WordGraph = () => {
                 new THREE.MeshPhongMaterial({color: 0xFFFFFF}),
                 MAX_NODES
             );
-            params.nodeCount = 250;
+            // params.nodeCount = 250;
             sphereInstance.count = params.nodeCount;
             sphereInstance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
 
@@ -80,7 +80,7 @@ const WordGraph = () => {
             // set up GUI
             const gui = new GUI();
             gui.add(sphereInstance, "count", 1, MAX_NODES, 10)
-            gui.add(params, "threshold", 0.50, 0.99, 0.01).listen().onChange(() => {
+            gui.add(params, "threshold", 0.45, 1.00, 0.01).onChange(() => {
                 initEdges();
             });
         
@@ -115,7 +115,6 @@ const WordGraph = () => {
         const initNodes = () => {
             if (g.nodes.length > 0) {
                 g.Purge();
-
                 // TODO: dispose + remove instances?
             }
 
@@ -154,6 +153,8 @@ const WordGraph = () => {
             if (g.edges.length > 0) {
                 g.PurgeEdges();
             }
+
+            // TODO: update nScale for g.Move() animation
 
             for (let j = 0; j < params.nodeCount; j++) {
                 const row = SIMSDATA[j];
@@ -203,9 +204,8 @@ const WordGraph = () => {
                 for (let i = 0; i < scene.children.length; i++) {
                     if (scene.children[i].isLineSegments) {
                         const obj = scene.children[i];
-                        // TODO: Debug why obj doesn't have dipose() methods
-                        // obj.geometry.dipose(); // throws error
-                        // obj.material.dispose(); // throws error
+                        obj.geometry.dispose();
+                        obj.material.dispose(); 
                         scene.remove(obj);
                     }
                 }
@@ -263,17 +263,6 @@ const WordGraph = () => {
             renderer.render(scene, camera);
             labelRenderer.render(scene, camera);
         }
-
-        // const move = () => {
-        //     if (!sphereInstance) return;
-
-        //     sphereInstance.getMatrixAt(1, _matrix); // extract position from transformationMatrix
-        //     _position.x += 10; // move
-        //     _position.y += 10; // move
-        //     _matrix.setPosition(_position); // write new position to transformationMatrix
-            
-        //     sphereInstance.setMatrixAt(0, _matrix);
-        // }
 
         const animate = () => {
             requestAnimationFrame(animate);

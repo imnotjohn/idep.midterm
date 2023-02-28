@@ -10,7 +10,6 @@ import WORDS from '../lib/SimWords';
 
 
 import {WG, WN, WE} from '../lib/SimpleGraphHelper';
-import { LineSegments } from 'three';
 
 const SimpleGraph = () => {
     const mountRef = useRef(null);
