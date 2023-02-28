@@ -18,3 +18,14 @@
     font-size: 0.5em;
     text-transform: uppercase;
 }
+
+#status {
+  color: #333;
+  font-family: monospace;
+  font-size: 1.45em;
+  font-weight: 600;
+  left: 3em;
+  letter-spacing: -0.035em;
+  position: absolute;
+  top: 3.5em;
+}

@@ -80,8 +80,11 @@ const WordGraph = () => {
             // set up GUI
             const gui = new GUI();
             gui.add(sphereInstance, "count", 1, MAX_NODES, 10)
-            gui.add(params, "threshold", 0.45, 1.00, 0.01).onChange(() => {
+            gui.add(params, "threshold", 0.45, 1.00, 0.01).onChange((v) => {
                 initEdges();
+
+                const el = document.querySelector("#status");
+                el.innerText = v;
             });
         
             window.addEventListener( 'resize', onWindowResize );
@@ -155,6 +158,7 @@ const WordGraph = () => {
             }
 
             // TODO: update nScale for g.Move() animation
+            const moveScale = nScale;
 
             for (let j = 0; j < params.nodeCount; j++) {
                 const row = SIMSDATA[j];
@@ -164,12 +168,14 @@ const WordGraph = () => {
                     const sim = row[i];
                     if (sim < params.threshold) {
                         e.k = 0.05;
-                        e.targetLength = (1.0 - sim) * nScale * 2.0;
+                        e.targetLength = (1.0 - sim) * moveScale * 2.0;
+                        console.log(`not sim: ${e.targetLength}`);
                         e.show = false;
                     } else {
                         _points.push(g.nodes[j].p)
                         e.k = 0.5;
-                        e.targetLength = (1.0 - sim) * nScale;
+                        e.targetLength = (1.0 - sim) * moveScale;
+                        console.log(`sim: ${e.targetLength}`);
                         e.show = true;
                     }
                 }
@@ -267,6 +273,7 @@ const WordGraph = () => {
         const animate = () => {
             requestAnimationFrame(animate);
 
+            // g.Move(0.95, 0.02);
             render();
             controls.update();
         }
@@ -280,7 +287,10 @@ const WordGraph = () => {
     }, []);
 
     return (
-        <div id="Graph" ref={mountRef} />
+        <>
+            <div id="status">First Futures: Gather</div>
+            <div id="Graph" ref={mountRef} />
+        </>
     )
 }
 

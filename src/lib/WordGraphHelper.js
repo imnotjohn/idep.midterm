@@ -79,19 +79,15 @@ class WE {
     }
 
     ApplySpringForce = () => {
-        for (let i = 0; i < this.edges.length; i++) {
-            const n0 = this.edges[i].n0;
-            const n1 = this.edges[i].n1;
-            const forceDir = n1.p.sub(n0.p); // forceDir
-            const dist = forceDir.length(); // currentLength
-            // const strain = this.edges[i].targetLength - currLength;
-            const strain = (dist - this.edges[i].targetLength) * this.edges[i].k;
-            forceDir.normalize();
-            forceDir.multiplyScalar(strain)
+        const forceDir = this.n1.p.sub(this.n0.p); // forceDir
+        const dist = forceDir.length(); // currentLength
+        // const strain = this.edges[i].targetLength - currLength;
+        const strain = (dist - this.targetLength) * this.k;
+        forceDir.normalize();
+        forceDir.multiplyScalar(strain)
 
-            n0.f.add(forceDir);
-            n1.f.sub(forceDir);
-        }
+        this.n0.f.add(forceDir);
+        this.n1.f.sub(forceDir);
     }
 }
 
