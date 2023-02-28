@@ -4,8 +4,11 @@ import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
 import './css/Graph.css';
 
+// DATA
 import SIMSDATA from '../lib/SimMatData';
 import WORDS from '../lib/SimWords';
+
+// Labels
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
 
@@ -84,6 +87,7 @@ const WordGraph = () => {
             sphereInstance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
 
             scene.add(sphereInstance);
+            console.log(sphereInstance);
 
             // set up GUI
             const gui = new GUI();
@@ -120,13 +124,16 @@ const WordGraph = () => {
             nodeDiv.style.marginTop = "-1em";
             const nodeLabel = new CSS2DObject(nodeDiv);
             nodeLabel.position.set(node.p.x, node.p.y, node.p.z);
-            sphereInstance.add(nodeLabel);
+            // sphereInstance.add(nodeLabel);
+            scene.add(nodeLabel);
         }
 
         const initNodes = () => {
+            // when changing slider for amount of nodes
             if (g.nodes.length > 0) {
                 g.Purge();
                 // TODO: dispose + remove instances?
+                // TODO: how to attach CSS2D elements to each instance? 
             }
 
             for (let i = 0; i < params.nodeCount; i++) {
@@ -177,13 +184,11 @@ const WordGraph = () => {
                     if (sim < params.threshold) {
                         e.k = 0.05;
                         e.targetLength = (1.0 - sim) * moveScale * 2.0;
-                        console.log(`not sim: ${e.targetLength}`);
                         e.show = false;
                     } else {
                         _points.push(g.nodes[j].p)
                         e.k = 0.5;
                         e.targetLength = (1.0 - sim) * moveScale;
-                        console.log(`sim: ${e.targetLength}`);
                         e.show = true;
                     }
                 }
@@ -224,19 +229,6 @@ const WordGraph = () => {
                     }
                 }
 
-                // debugging
-                let lsCount = 0;
-                for (let i = 0; i < scene.children.length; i++) {
-                    if (scene.children[i].isLineSegments) {
-                        lsCount++;
-                    }
-                }
-                console.log(lsCount);
-                console.log(`number of children: ${scene.children.length}`);
-                if (lsCount > 0) {
-                    console.log(scene);
-                }
-
                 for (let i = 0; i < g.edges.length; i++) {
                     if (g.edges[i].show) {
                         lineNum++;
@@ -252,7 +244,6 @@ const WordGraph = () => {
                         scene.add(lineSegments);
                     }
                 }
-
             }
 
             sphereInstance.instanceMatrix.needsUpdate = true;
@@ -289,6 +280,7 @@ const WordGraph = () => {
         init();
         initNodes();
         initEdges();
+        console.log(scene);
         animate();
 
         return () => mRef.current.removeChild(renderer.domElement);
