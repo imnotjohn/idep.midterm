@@ -30,15 +30,23 @@ const WordGraph = () => {
         const nScale = 60;
 
         const params = {
-            nodeCount: 20,
+            nodeCount: MAX_NODES,
             threshold: 0.65,
         }
+        params.threshold = params.nodeCount > 100 ? 0.85 : 0.65;
 
         const init = () => {
 
             // threejs Environment
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xDEDEDE);
+            
+            if (document.querySelector("#count")) {
+                const countElement = document.querySelector("#count");
+                const threshElement = document.querySelector("#threshold");
+                countElement.innerText = params.nodeCount;
+                threshElement.innerText = params.threshold;
+            }
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(225, 250, 100);
@@ -71,20 +79,20 @@ const WordGraph = () => {
                 new THREE.MeshPhongMaterial({color: 0xFFFFFF}),
                 MAX_NODES
             );
-            // params.nodeCount = 250;
-            sphereInstance.count = params.nodeCount;
+            // params.nodeCount = 20;
+            // sphereInstance.count = params.nodeCount;
             sphereInstance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
 
             scene.add(sphereInstance);
 
             // set up GUI
             const gui = new GUI();
-            gui.add(sphereInstance, "count", 1, MAX_NODES, 10)
+            gui.add(sphereInstance, "count", 1, MAX_NODES, 10).onChange((v) => {
+                // countElement.innerText = params.nodeCount;
+            });
             gui.add(params, "threshold", 0.45, 1.00, 0.01).onChange((v) => {
                 initEdges();
-
-                const el = document.querySelector("#status");
-                el.innerText = v;
+                // threshElement.innerText = v;
             });
         
             window.addEventListener( 'resize', onWindowResize );
@@ -288,7 +296,11 @@ const WordGraph = () => {
 
     return (
         <>
-            <div id="status">First Futures: Gather</div>
+            {/* <div id="title">First Futures: Gather</div>
+            <div id="status">
+                <p>Count: <span id="count"></span></p>
+                <p>Threshold: <span id="threshold"></span></p>
+            </div> */}
             <div id="Graph" ref={mountRef} />
         </>
     )
