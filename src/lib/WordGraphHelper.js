@@ -21,11 +21,11 @@ class WG {
         if (this.fixed) return;
 
         for (let i = 0; i < this.nodes.length; i++) {
-            this.nodes[i].f = new THREE.Vector3();
+            this.nodes[i].f = new THREE.Vector3(0.0, 0.0, 0.0);
         }
 
-        for (let i = 0; i < this.edges.length; i++) {
-            this.edges[i].ApplySpringForce();
+       for (let i = 0; i < this.edges.length; i++) {
+           this.edges[i].ApplySpringForce();
         }
 
         for (let i = 0; i < this.nodes.length; i++) {
@@ -65,6 +65,7 @@ class WN {
         this.u.multiplyScalar(damping);
         this.u.add(this.f.multiplyScalar(dt));
         this.p.add(this.u.multiplyScalar(dt));
+        //this.p.add(new THREE.Vector3(0.5, 0.0, 0.0));
     }
 }
 
@@ -73,13 +74,14 @@ class WE {
     constructor(n0, n1) {
         this.n0 = n0;
         this.n1 = n1;
-        this.targetLength = 0.05;
-        this.k = 0.5; // spring constant
+        this.targetLength = 100.0;
+        this.k = 0.15; // spring constant
         this.show = false;
     }
 
     ApplySpringForce = () => {
-        const forceDir = this.n1.p.sub(this.n0.p); // forceDir
+        let forceDir = this.n1.p.clone()
+        forceDir.sub(this.n0.p); // forceDir
         const dist = forceDir.length(); // currentLength
         // const strain = this.edges[i].targetLength - currLength;
         const strain = (dist - this.targetLength) * this.k;

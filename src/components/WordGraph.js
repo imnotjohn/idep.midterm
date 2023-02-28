@@ -156,14 +156,16 @@ const WordGraph = () => {
             // for (let i = 0; i < params.nodeCount; i++) {
             for (let i = 0; i < g.nodes.length; i++) {
                 const n = g.nodes[i];
-                initLabel(n);
+                //initLabel(n);
                 _dummy.position.set(n.p.x, n.p.y, n.p.z);
                 _dummy.updateMatrix();
                 sphereInstance.setMatrixAt(i, _dummy.matrix);
 
-                sphereInstance.instanceMatrix.needsUpdate = true;
-                sphereInstance.geometry.attributes.position.needsUpdate = true;
+    
             }
+
+            sphereInstance.instanceMatrix.needsUpdate = true;
+            sphereInstance.geometry.attributes.position.needsUpdate = true;
         }
 
         const initEdges = () => {
@@ -182,13 +184,13 @@ const WordGraph = () => {
                     g.edges.push(e);
                     const sim = row[i];
                     if (sim < params.threshold) {
-                        e.k = 0.05;
-                        e.targetLength = (1.0 - sim) * moveScale * 2.0;
+                        e.k = 10.0;
+                        e.targetLength = 100.0;// (1.0 - sim) * moveScale * 2.0;
                         e.show = false;
                     } else {
                         _points.push(g.nodes[j].p)
-                        e.k = 0.5;
-                        e.targetLength = (1.0 - sim) * moveScale;
+                        e.k = 50.1;
+                        e.targetLength = 20.0;//(1.0 - sim) * moveScale;
                         e.show = true;
                     }
                 }
@@ -272,7 +274,10 @@ const WordGraph = () => {
         const animate = () => {
             requestAnimationFrame(animate);
 
-            // g.Move(0.95, 0.02);
+            console.log("animate");
+
+            g.Move(0.95, 0.02);
+            updateNodes();
             render();
             controls.update();
         }
