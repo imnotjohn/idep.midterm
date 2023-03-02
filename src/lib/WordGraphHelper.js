@@ -1,11 +1,14 @@
 import * as THREE from 'three';
+// Labels
+import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
 // word graph
 class WG {
     constructor() {
         this.nodes = [];
         this.edges = [];
-        this.fixed = false;
+        this.fixed = false; // when to stop loops
+        this.scene = new THREE.Scene();
     }
 
     Purge = () => {
@@ -16,10 +19,32 @@ class WG {
     PurgeEdges = () => {
         this.edges = [];
     }
+    test() {
+        console.log("test");
+    }
+    // internal functions
+    initLabels = (node) => {
+        // 2D
+        const nodeDiv = document.createElement("div");
+        nodeDiv.className = "label";
+        nodeDiv.textContent = node.w;
+        nodeDiv.style.marginTop = "-1em";
+        const nodeLabel = new CSS2DObject(nodeDiv);
+        nodeLabel.position.set(node.p.x, node.p.y, node.p.z);
+        // sphereInstance.add(nodeLabel);
+        this.scene.add(nodeLabel);        
+    }
+    removeLabels = () => {
+        const sc = this.scene.children;
+        for (let i = 0; i < sc.length; i++) {
+            if (sc[i].isCSS2DObject) {
+                this.scene.remove(sc[i]);
+            }
+        }
+    }
 
     Move = (damping, dt) => {
         if (this.fixed) return;
-
         for (let i = 0; i < this.nodes.length; i++) {
             this.nodes[i].f = new THREE.Vector3(0.0, 0.0, 0.0);
         }
@@ -30,6 +55,7 @@ class WG {
 
         for (let i = 0; i < this.nodes.length; i++) {
             this.nodes[i].Move(damping, dt);
+            this.initLabels(this.nodes[i]);
         }
     }
 

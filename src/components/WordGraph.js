@@ -3,14 +3,10 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
 import './css/Graph.css';
-
+import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
 // DATA
 import SIMSDATA from '../lib/SimMatData';
 import WORDS from '../lib/SimWords';
-
-// Labels
-import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-
 
 import {WG, WN, WE} from '../lib/WordGraphHelper';
 
@@ -33,15 +29,16 @@ const WordGraph = () => {
         const nScale = 60;
 
         const params = {
-            nodeCount: MAX_NODES,
-            threshold: 0.65,
+            nodeCount: 30,
+            threshold: 0.64,
         }
-        params.threshold = params.nodeCount > 100 ? 0.85 : 0.65;
+        // params.threshold = params.nodeCount > 100 ? 0.85 : 0.65;
 
         const init = () => {
 
             // threejs Environment
-            scene = new THREE.Scene();
+            // scene = new THREE.Scene();
+            scene = g.scene;
             scene.background = new THREE.Color(0xDEDEDE);
             
             if (document.querySelector("#count")) {
@@ -87,7 +84,6 @@ const WordGraph = () => {
             sphereInstance.instanceMatrix.setUsage(THREE.DynamicDrawUsage); // will be updated every frame
 
             scene.add(sphereInstance);
-            console.log(sphereInstance);
 
             // set up GUI
             const gui = new GUI();
@@ -116,24 +112,22 @@ const WordGraph = () => {
             camera.lookAt(vec.x/len, vec.y/len, vec.z/len);
         }
 
-        const initLabel = (node) => {
-            // 2D
-            const nodeDiv = document.createElement("div");
-            nodeDiv.className = "label";
-            nodeDiv.textContent = node.w;
-            nodeDiv.style.marginTop = "-1em";
-            const nodeLabel = new CSS2DObject(nodeDiv);
-            nodeLabel.position.set(node.p.x, node.p.y, node.p.z);
-            // sphereInstance.add(nodeLabel);
-            scene.add(nodeLabel);
-        }
+        // const initLabel = (node) => {
+        //     // 2D
+        //     const nodeDiv = document.createElement("div");
+        //     nodeDiv.className = "label";
+        //     nodeDiv.textContent = node.w;
+        //     nodeDiv.style.marginTop = "-1em";
+        //     const nodeLabel = new CSS2DObject(nodeDiv);
+        //     nodeLabel.position.set(node.p.x, node.p.y, node.p.z);
+        //     // sphereInstance.add(nodeLabel);
+        //     scene.add(nodeLabel);
+        // }
 
         const initNodes = () => {
             // when changing slider for amount of nodes
             if (g.nodes.length > 0) {
                 g.Purge();
-                // TODO: dispose + remove instances?
-                // TODO: how to attach CSS2D elements to each instance? 
             }
 
             for (let i = 0; i < params.nodeCount; i++) {
@@ -147,16 +141,13 @@ const WordGraph = () => {
             }
 
             updateNodes();
-
-            // update position to centroid of nodes
-            setTargetAverage();
         }
 
         const updateNodes = () => {
             // for (let i = 0; i < params.nodeCount; i++) {
             for (let i = 0; i < g.nodes.length; i++) {
                 const n = g.nodes[i];
-                //initLabel(n);
+                // initLabel(n);
                 _dummy.position.set(n.p.x, n.p.y, n.p.z);
                 _dummy.updateMatrix();
                 sphereInstance.setMatrixAt(i, _dummy.matrix);
@@ -185,7 +176,7 @@ const WordGraph = () => {
                     const sim = row[i];
                     if (sim < params.threshold) {
                         e.k = 10.0;
-                        e.targetLength = 100.0;// (1.0 - sim) * moveScale * 2.0;
+                        e.targetLength = 200.0;// (1.0 - sim) * moveScale * 2.0;
                         e.show = false;
                     } else {
                         _points.push(g.nodes[j].p)
@@ -274,18 +265,19 @@ const WordGraph = () => {
         const animate = () => {
             requestAnimationFrame(animate);
 
-            console.log("animate");
-
+            g.removeLabels();
             g.Move(0.95, 0.02);
             updateNodes();
+            initEdges();
             render();
             controls.update();
         }
 
         init();
         initNodes();
-        initEdges();
-        console.log(scene);
+        // update position to centroid of nodes
+        setTargetAverage();
+        // initEdges();
         animate();
 
         return () => mRef.current.removeChild(renderer.domElement);
