@@ -30,7 +30,7 @@ const WordGraph = () => {
 
         const params = {
             nodeCount: 30,
-            threshold: 0.64,
+            threshold: 0.68, //0.64
         }
         // params.threshold = params.nodeCount > 100 ? 0.85 : 0.65;
 
@@ -87,9 +87,9 @@ const WordGraph = () => {
 
             // set up GUI
             const gui = new GUI();
-            gui.add(sphereInstance, "count", 1, MAX_NODES, 10).onChange((v) => {
+            // gui.add(sphereInstance, "count", 1, MAX_NODES, 10).onChange((v) => {
                 // countElement.innerText = params.nodeCount;
-            });
+            // });
             gui.add(params, "threshold", 0.45, 1.00, 0.01).onChange((v) => {
                 initEdges();
                 // threshElement.innerText = v;
@@ -163,11 +163,18 @@ const WordGraph = () => {
             // Clear Edges if Edges already exists
             if (g.edges.length > 0) {
                 g.PurgeEdges();
+
+                for (let i = 0; i < scene.children.length; i++) {
+                    if (scene.children[i].isLineSegments) {
+                        const obj = scene.children[i];
+                        obj.geometry.dispose();
+                        obj.material.dispose(); 
+                        scene.remove(obj);
+                    }
+                }
             }
 
-            // TODO: update nScale for g.Move() animation
             const moveScale = nScale;
-
             for (let j = 0; j < params.nodeCount; j++) {
                 const row = SIMSDATA[j];
                 for (let i = j + 1; i < params.nodeCount; i++) {
@@ -176,12 +183,12 @@ const WordGraph = () => {
                     const sim = row[i];
                     if (sim < params.threshold) {
                         e.k = 10.0;
-                        e.targetLength = 200.0;// (1.0 - sim) * moveScale * 2.0;
+                        e.targetLength = 100 + (1.0 - sim) * moveScale; // 200.0;
                         e.show = false;
                     } else {
                         _points.push(g.nodes[j].p)
-                        e.k = 50.1;
-                        e.targetLength = 20.0;//(1.0 - sim) * moveScale;
+                        e.k = 50;
+                        e.targetLength = 35 + (1.0 - sim) * moveScale; // 20.0;//
                         e.show = true;
                     }
                 }
@@ -193,7 +200,7 @@ const WordGraph = () => {
         const drawEdges = () => {
             // update edges connections
             let lineNum = 0;
-            if (!lineSegments) {
+            // if (!lineSegments) {
                 // lineSegments not yet initialized
                 for (let i = 0; i < g.edges.length; i++) {
                     if (g.edges[i].show) {
@@ -211,33 +218,33 @@ const WordGraph = () => {
                         scene.add(lineSegments);
                     }
                 }
-            } else {
+            // } else {
                 // lineSegments already exists
-                for (let i = 0; i < scene.children.length; i++) {
-                    if (scene.children[i].isLineSegments) {
-                        const obj = scene.children[i];
-                        obj.geometry.dispose();
-                        obj.material.dispose(); 
-                        scene.remove(obj);
-                    }
-                }
+                // for (let i = 0; i < scene.children.length; i++) {
+                //     if (scene.children[i].isLineSegments) {
+                //         const obj = scene.children[i];
+                //         obj.geometry.dispose();
+                //         obj.material.dispose(); 
+                //         scene.remove(obj);
+                //     }
+                // }
 
-                for (let i = 0; i < g.edges.length; i++) {
-                    if (g.edges[i].show) {
-                        lineNum++;
-                        const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
-                        const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
-                        lineSegments = new THREE.LineSegments(lineGeo, 
-                            new THREE.LineBasicMaterial({
-                                color: 0xFF0033,
-                                transparent: true,
-                                opacity: 0.45,
-                                depthWrite: false
-                            }));
-                        scene.add(lineSegments);
-                    }
-                }
-            }
+                // for (let i = 0; i < g.edges.length; i++) {
+                //     if (g.edges[i].show) {
+                //         lineNum++;
+                //         const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
+                //         const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+                //         lineSegments = new THREE.LineSegments(lineGeo, 
+                //             new THREE.LineBasicMaterial({
+                //                 color: 0xFF0033,
+                //                 transparent: true,
+                //                 opacity: 0.45,
+                //                 depthWrite: false
+                //             }));
+                //         scene.add(lineSegments);
+                //     }
+                // }
+            // }
 
             sphereInstance.instanceMatrix.needsUpdate = true;
             lineSegments.geometry.setDrawRange(0, lineNum);
@@ -253,7 +260,7 @@ const WordGraph = () => {
 
         const render = () => {
             if (sphereInstance) {
-                scene.rotation.y += 0.00005;
+                scene.rotation.y += 0.00015;
                 scene.updateMatrixWorld();
                 sphereInstance.updateMatrixWorld();
             }
@@ -266,9 +273,11 @@ const WordGraph = () => {
             requestAnimationFrame(animate);
 
             g.removeLabels();
-            g.Move(0.95, 0.02);
+            // g.PurgeLabels();
+            g.Move(0.95, 0.015);
             updateNodes();
             initEdges();
+            setTargetAverage();
             render();
             controls.update();
         }

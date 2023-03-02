@@ -43,10 +43,21 @@ class WG {
         }
     }
 
+    PurgeLabels = () => {
+        this.removeLabels();
+    }
+
+    UpdateLabels = () => {
+        for (let i = 0; i < this.nodes.length; i++) {
+            this.initLabels(this.nodes[i]);
+        }
+    }
+
     Move = (damping, dt) => {
         if (this.fixed) return;
         for (let i = 0; i < this.nodes.length; i++) {
             this.nodes[i].f = new THREE.Vector3(0.0, 0.0, 0.0);
+            this.initLabels(this.nodes[i]);
         }
 
        for (let i = 0; i < this.edges.length; i++) {
@@ -55,7 +66,6 @@ class WG {
 
         for (let i = 0; i < this.nodes.length; i++) {
             this.nodes[i].Move(damping, dt);
-            this.initLabels(this.nodes[i]);
         }
     }
 
