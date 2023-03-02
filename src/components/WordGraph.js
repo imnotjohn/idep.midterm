@@ -29,15 +29,15 @@ const WordGraph = () => {
         const nScale = 60;
 
         const params = {
+            corpus: "Western Corpus",
             nodeCount: 30,
-            threshold: 0.68, //0.64
+            threshold: 0.65, //0.68
         }
         // params.threshold = params.nodeCount > 100 ? 0.85 : 0.65;
 
         const init = () => {
 
             // threejs Environment
-            // scene = new THREE.Scene();
             scene = g.scene;
             scene.background = new THREE.Color(0xDEDEDE);
             
@@ -87,12 +87,20 @@ const WordGraph = () => {
 
             // set up GUI
             const gui = new GUI();
+            // node counts
             // gui.add(sphereInstance, "count", 1, MAX_NODES, 10).onChange((v) => {
                 // countElement.innerText = params.nodeCount;
             // });
-            gui.add(params, "threshold", 0.45, 1.00, 0.01).onChange((v) => {
+            // model dropdowns
+            const guiModelFolder = gui.addFolder("Model Selection");
+            const modelStates = ["Western Corpus", "Indigenous Corpus"];
+            guiModelFolder.add(params, "corpus").options(modelStates).onChange((v) => {
+                console.log(v);
+            })
+            // similarity threshold
+            const guiThresholdFolder = gui.addFolder("Threshold");
+            guiThresholdFolder.add(params, "threshold", 0.45, 1.00, 0.01).onChange((v) => {
                 initEdges();
-                // threshElement.innerText = v;
             });
         
             window.addEventListener( 'resize', onWindowResize );
@@ -276,17 +284,15 @@ const WordGraph = () => {
             // g.PurgeLabels();
             g.Move(0.95, 0.015);
             updateNodes();
-            initEdges();
             setTargetAverage();
+            initEdges();
             render();
             controls.update();
         }
 
         init();
         initNodes();
-        // update position to centroid of nodes
-        setTargetAverage();
-        // initEdges();
+        setTargetAverage(); // update position to centroid of nodes
         animate();
 
         return () => mRef.current.removeChild(renderer.domElement);

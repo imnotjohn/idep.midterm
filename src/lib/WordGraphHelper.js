@@ -48,6 +48,8 @@ class WG {
     }
 
     UpdateLabels = () => {
+        this.removeLabels();
+        
         for (let i = 0; i < this.nodes.length; i++) {
             this.initLabels(this.nodes[i]);
         }
@@ -119,7 +121,6 @@ class WE {
         let forceDir = this.n1.p.clone()
         forceDir.sub(this.n0.p); // forceDir
         const dist = forceDir.length(); // currentLength
-        // const strain = this.edges[i].targetLength - currLength;
         const strain = (dist - this.targetLength) * this.k;
         forceDir.normalize();
         forceDir.multiplyScalar(strain)
