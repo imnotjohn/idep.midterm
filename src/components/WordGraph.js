@@ -4,9 +4,12 @@ import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
 import './css/Graph.css';
 import {CSS2DRenderer} from 'three/addons/renderers/CSS2DRenderer.js';
-// DATA
-import SIMSDATA from '../lib/SimMatData';
-import WORDS from '../lib/SimWords';
+// Data
+import SIMSDATA from '../lib/SimMat';
+// import WORDS from '../lib/SimWords';
+// Indigenous Model Data
+import IndigenousSIMSDATA from '../lib/IndigenousSimMat';
+import IndigenousWords from '../lib/IndigenousSimWords';
 
 import {WG, WN, WE} from '../lib/WordGraphHelper';
 
@@ -27,10 +30,11 @@ const WordGraph = () => {
         const _position = new THREE.Vector3();
         const _points = [];
         const nScale = 60;
+        let _SIMS = SIMSDATA;
 
         const params = {
             corpus: "Western Corpus",
-            nodeCount: 30,
+            nodeCount: 25,
             threshold: 0.65, //0.68
         }
         // params.threshold = params.nodeCount > 100 ? 0.85 : 0.65;
@@ -95,7 +99,19 @@ const WordGraph = () => {
             const guiModelFolder = gui.addFolder("Model Selection");
             const modelStates = ["Western Corpus", "Indigenous Corpus"];
             guiModelFolder.add(params, "corpus").options(modelStates).onChange((v) => {
-                console.log(v);
+                if (v.includes("Western")) {
+                    // params.threshold = 0.65;
+                    _SIMS = SIMSDATA;
+                    // g.scene.clear();
+                    // initNodes();
+                    // initEdges();
+                } else {
+                    // params.threshold = 0.53;
+                    _SIMS = IndigenousSIMSDATA;
+                    // g.scene.clear();
+                    // initNodes();
+                    // initEdges();
+                }
             })
             // similarity threshold
             const guiThresholdFolder = gui.addFolder("Threshold");
@@ -145,7 +161,7 @@ const WordGraph = () => {
                         Math.random() * 200 - 10,
                         Math.random() * 200 - 50,
                         ), 
-                    WORDS[i]));
+                    IndigenousWords[i]));
             }
 
             updateNodes();
@@ -184,7 +200,9 @@ const WordGraph = () => {
 
             const moveScale = nScale;
             for (let j = 0; j < params.nodeCount; j++) {
-                const row = SIMSDATA[j];
+                // const row = SimMat[j]; // similarity matrix from glove-50 model
+                // const row = IndigenousSIMSDATA[j]; // similarity matrix from indigenous model
+                const row = _SIMS[j];
                 for (let i = j + 1; i < params.nodeCount; i++) {
                     const e = new WE(g.nodes[j], g.nodes[i])
                     g.edges.push(e);
