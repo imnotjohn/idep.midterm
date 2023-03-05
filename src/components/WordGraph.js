@@ -35,7 +35,7 @@ const WordGraph = () => {
         const params = {
             corpus: "Western Corpus",
             nodeCount: 25,
-            threshold: 0.65, //0.68
+            threshold: 0.70, //0.68
         }
         // params.threshold = params.nodeCount > 100 ? 0.85 : 0.65;
 
@@ -100,17 +100,11 @@ const WordGraph = () => {
             const modelStates = ["Western Corpus", "Indigenous Corpus"];
             guiModelFolder.add(params, "corpus").options(modelStates).onChange((v) => {
                 if (v.includes("Western")) {
-                    // params.threshold = 0.65;
+                    params.threshold = 0.70;
                     _SIMS = SIMSDATA;
-                    // g.scene.clear();
-                    // initNodes();
-                    // initEdges();
                 } else {
-                    // params.threshold = 0.53;
+                    params.threshold = 0.56;
                     _SIMS = IndigenousSIMSDATA;
-                    // g.scene.clear();
-                    // initNodes();
-                    // initEdges();
                 }
             })
             // similarity threshold
