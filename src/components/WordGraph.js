@@ -9,6 +9,8 @@ import SIMSDATA from '../lib/SimMat';
 // import WORDS from '../lib/SimWords';
 // Indigenous Model Data
 import IndigenousSIMSDATA from '../lib/IndigenousSimMat';
+import INDSIMS300 from '../lib/IndigenousSimMat300'; // Similarity Matrix from Model trained on 300 Epochs
+import INDSIMS200 from '../lib/IndigenousSimMat200'; // Similarity Matrix from Model trained on 200 Epochs
 import IndigenousWords from '../lib/IndigenousSimWords';
 
 import {WG, WN, WE} from '../lib/WordGraphHelper';
@@ -103,8 +105,11 @@ const WordGraph = () => {
                     params.threshold = 0.70;
                     _SIMS = SIMSDATA;
                 } else {
-                    params.threshold = 0.56;
-                    _SIMS = IndigenousSIMSDATA;
+                    // params.threshold = 0.56; //100 Epochs
+                    params.threshold = 0.52; //200 Epochs
+                    // _SIMS = IndigenousSIMSDATA;
+                    // _SIMS = INDSIMS300;
+                    _SIMS = INDSIMS200;
                 }
             })
             // similarity threshold
