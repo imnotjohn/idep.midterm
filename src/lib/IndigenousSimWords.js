@@ -15,7 +15,7 @@ const IndigenousWords = [
     "astronomy",
     "philosophy",
     "economics",
-    "violence",
+    "song",
     "sun",
     "earth",
     "spirit",
