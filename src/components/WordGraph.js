@@ -17,7 +17,7 @@ import {WG, WN, WE} from '../lib/WordGraphHelper';
 
 const WordGraph = () => {
     const mountRef = useRef(null);
-    const MAX_NODES = 400;
+    const MAX_NODES = 25;
 
     useEffect( () => {
         let mRef = mountRef;
@@ -35,7 +35,7 @@ const WordGraph = () => {
         let _SIMS = SIMSDATA;
 
         const params = {
-            corpus: "Western Corpus",
+            corpus: "western",
             nodeCount: 25,
             threshold: 0.70, //0.68
         }
@@ -45,7 +45,7 @@ const WordGraph = () => {
 
             // threejs Environment
             scene = g.scene;
-            scene.background = new THREE.Color(0xDEDEDE);
+            scene.background = new THREE.Color(0x7c8471);
             
             if (document.querySelector("#count")) {
                 const countElement = document.querySelector("#count");
@@ -81,8 +81,8 @@ const WordGraph = () => {
 
             // Instanced Object
             sphereInstance = new THREE.InstancedMesh(
-                new THREE.SphereGeometry(.65, 32, 16),
-                new THREE.MeshPhongMaterial({color: 0xFFFFFF}),
+                new THREE.SphereGeometry(0.8, 32, 16),
+                new THREE.MeshPhongMaterial({color: 0xD9D192}),
                 MAX_NODES
             );
             // params.nodeCount = 20;
@@ -99,9 +99,9 @@ const WordGraph = () => {
             // });
             // model dropdowns
             const guiModelFolder = gui.addFolder("Model Selection");
-            const modelStates = ["Western Corpus", "Indigenous Corpus"];
+            const modelStates = ["western", "non-western"];
             guiModelFolder.add(params, "corpus").options(modelStates).onChange((v) => {
-                if (v.includes("Western")) {
+                if (!v.includes("non")) {
                     params.threshold = 0.70;
                     _SIMS = SIMSDATA;
                 } else {
@@ -225,24 +225,21 @@ const WordGraph = () => {
         const drawEdges = () => {
             // update edges connections
             let lineNum = 0;
-            // if (!lineSegments) {
-                // lineSegments not yet initialized
-                for (let i = 0; i < g.edges.length; i++) {
-                    if (g.edges[i].show) {
-                        lineNum++;
-                        const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
-                        const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
-                        lineSegments = new THREE.LineSegments(lineGeo, 
-                            new THREE.LineBasicMaterial({
-                                color: 0xFF0033,
-                                transparent: true,
-                                opacity: 0.45,
-                                depthWrite: false
-                            }));
-                        // sphereInstance.add(lineSegments);
-                        scene.add(lineSegments);
-                    }
+            for (let i = 0; i < g.edges.length; i++) {
+                if (g.edges[i].show) {
+                    lineNum++;
+                    const pts = [g.edges[i].n0.p, g.edges[i].n1.p];
+                    const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+                    lineSegments = new THREE.LineSegments(lineGeo, 
+                        new THREE.LineBasicMaterial({
+                            color: 0xFE9946,
+                            transparent: true,
+                            opacity: 0.6,
+                            depthWrite: false
+                        }));
+                    scene.add(lineSegments);
                 }
+            }
             // } else {
                 // lineSegments already exists
                 // for (let i = 0; i < scene.children.length; i++) {

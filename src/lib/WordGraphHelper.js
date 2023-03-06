@@ -79,7 +79,7 @@ class WG {
                 const lineSegment = new THREE.LineSegments( // add to scene?
                     lineGeometry,
                     new THREE.LineBasicMaterial({
-                        color: 0xFF0033,
+                        color: 0xedf1e5,
                         transparent: true,
                         opacity: 0.45,
                         depthWrite: false,

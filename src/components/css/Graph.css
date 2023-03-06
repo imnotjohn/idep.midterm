@@ -14,9 +14,11 @@
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
     
-    color: #333;
-    font-size: 0.5em;
-    text-transform: uppercase;
+    color: #FFFFFF;
+    font-size: 0.9em;
+    letter-spacing: 0.035em;
+    opacity: 0.8;
+    text-transform: lowercase;
 }
 
 #title {
@@ -35,10 +37,10 @@
   display: flex;
   flex-direction: column;
   font-family: monospace;
-  font-size: 1.3em;
+  font-size: 1.5em;
   font-weight: 400;
   left: 3em;
-  letter-spacing: -0.015em;
+  letter-spacing: 0.015em;
   position: absolute;
   top: 6.5em;
 }
