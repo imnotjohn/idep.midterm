@@ -45,7 +45,8 @@ const WordGraph = () => {
 
             // threejs Environment
             scene = g.scene;
-            scene.background = new THREE.Color(0x7c8471);
+            // scene.background = new THREE.Color(0x7c8471);
+            scene.background = new THREE.Color(0x222E1A);
             
             if (document.querySelector("#count")) {
                 const countElement = document.querySelector("#count");

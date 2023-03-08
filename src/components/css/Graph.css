@@ -15,7 +15,7 @@
                                   supported by Chrome, Edge, Opera and Firefox */
     
     color: #FFFFFF;
-    font-size: 0.9em;
+    font-size: 0.95em; /* node label fontsize */
     letter-spacing: 0.035em;
     opacity: 0.8;
     text-transform: lowercase;
